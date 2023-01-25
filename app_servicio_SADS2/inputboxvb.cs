@@ -21,6 +21,11 @@ namespace app_servicio_SADS2
             form.Text = title;
             label.Text = promptText;
             textBox.Text = value;
+            if (title=="CONTRASEÑA")
+            {
+                textBox.PasswordChar = 'D';
+            }
+            
 
             buttonOk.Text = "OK";
             buttonCancel.Text = "Cancel";

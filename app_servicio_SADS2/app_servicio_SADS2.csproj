@@ -28,8 +28,8 @@
     <PublisherName>JGM_tubacero</PublisherName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>76</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <ApplicationRevision>5</ApplicationRevision>
+    <ApplicationVersion>1.2.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -179,6 +179,8 @@
   <ItemGroup>
     <None Include="Resources\icons8-ajustes-48.png" />
     <Content Include="logo-1.png" />
+    <None Include="Resources\Close.png" />
+    <None Include="Resources\Minimize.png" />
     <Content Include="tubos2.ico" />
   </ItemGroup>
   <ItemGroup>

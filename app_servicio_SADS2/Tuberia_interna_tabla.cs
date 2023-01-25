@@ -10,7 +10,7 @@ namespace app_servicio_SADS2
     class Tuberia_interna_tabla
     {
         [JsonProperty("Tin_ID_tubo")]
-        public ulong Ta_id_tubo { get; set; }
+        public string Ta_id_tubo { get; set; }
         [JsonProperty("Tin_No_tubo")]
         public string Ta_no_tubo { get; set; }
         [JsonProperty("Tin_No_placa")]

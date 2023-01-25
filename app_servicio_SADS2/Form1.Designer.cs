@@ -45,7 +45,6 @@ namespace app_servicio_SADS2
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.btnPararAuto = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
             this.iglImagenes = new System.Windows.Forms.ImageList(this.components);
             this.lblTemporal2 = new System.Windows.Forms.Label();
             this.dgvDatosTabla = new System.Windows.Forms.DataGridView();
@@ -55,6 +54,7 @@ namespace app_servicio_SADS2
             this.ckbExcel = new System.Windows.Forms.CheckBox();
             this.btnCrearExcel = new System.Windows.Forms.Button();
             this.cmbManualMaquina = new System.Windows.Forms.ComboBox();
+            this.btnBusquedaFecha = new System.Windows.Forms.Button();
             this.cmbManualSoldadura = new System.Windows.Forms.ComboBox();
             this.rdbHorafinal = new System.Windows.Forms.RadioButton();
             this.rdbHorainicial = new System.Windows.Forms.RadioButton();
@@ -65,7 +65,6 @@ namespace app_servicio_SADS2
             this.lable1 = new System.Windows.Forms.Label();
             this.txbManualFecha = new System.Windows.Forms.TextBox();
             this.btnGuardarExcel = new System.Windows.Forms.Button();
-            this.btnBusquedaFecha = new System.Windows.Forms.Button();
             this.txbManualHoraFinal = new System.Windows.Forms.TextBox();
             this.txbManualHoraInicial = new System.Windows.Forms.TextBox();
             this.stsEstado = new System.Windows.Forms.StatusStrip();
@@ -78,8 +77,14 @@ namespace app_servicio_SADS2
             this.dgvTablaExcel = new System.Windows.Forms.DataGridView();
             this.ltbTemporal2 = new System.Windows.Forms.ListBox();
             this.tmrMonitoreo = new System.Windows.Forms.Timer(this.components);
-            this.ptbIndicador1 = new System.Windows.Forms.PictureBox();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.button1 = new System.Windows.Forms.Button();
+            this.panel3 = new System.Windows.Forms.Panel();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.PnlBarraTitulo = new System.Windows.Forms.Panel();
+            this.PtbMinimizar = new System.Windows.Forms.PictureBox();
+            this.PtbCerrar = new System.Windows.Forms.PictureBox();
+            this.ptbIndicador1 = new System.Windows.Forms.PictureBox();
             this.gpbModo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ptbIndicadorA)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ptbIndicador2)).BeginInit();
@@ -87,12 +92,19 @@ namespace app_servicio_SADS2
             this.gpbModoManual.SuspendLayout();
             this.stsEstado.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvTablaExcel)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ptbIndicador1)).BeginInit();
+            this.panel2.SuspendLayout();
+            this.panel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.PnlBarraTitulo.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.PtbMinimizar)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PtbCerrar)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ptbIndicador1)).BeginInit();
             this.SuspendLayout();
             // 
             // btnIniciarAuto
             // 
+            this.btnIniciarAuto.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(157)))), ((int)(((byte)(209)))));
+            this.btnIniciarAuto.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnIniciarAuto.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnIniciarAuto.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnIniciarAuto.ImageIndex = 15;
@@ -108,11 +120,13 @@ namespace app_servicio_SADS2
             // 
             // btnModoManual
             // 
-            this.btnModoManual.Location = new System.Drawing.Point(201, 61);
+            this.btnModoManual.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(157)))), ((int)(((byte)(209)))));
+            this.btnModoManual.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnModoManual.Location = new System.Drawing.Point(164, 61);
             this.btnModoManual.Name = "btnModoManual";
             this.btnModoManual.Size = new System.Drawing.Size(126, 41);
             this.btnModoManual.TabIndex = 1;
-            this.btnModoManual.Text = "ABRIR";
+            this.btnModoManual.Text = "INICIAR";
             this.btnModoManual.UseVisualStyleBackColor = true;
             this.btnModoManual.Click += new System.EventHandler(this.button2_Click);
             // 
@@ -128,9 +142,10 @@ namespace app_servicio_SADS2
             this.gpbModo.Controls.Add(this.btnIniciarAuto);
             this.gpbModo.Controls.Add(this.btnModoManual);
             this.gpbModo.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.gpbModo.Location = new System.Drawing.Point(14, 113);
+            this.gpbModo.ForeColor = System.Drawing.Color.WhiteSmoke;
+            this.gpbModo.Location = new System.Drawing.Point(4, 85);
             this.gpbModo.Name = "gpbModo";
-            this.gpbModo.Size = new System.Drawing.Size(345, 166);
+            this.gpbModo.Size = new System.Drawing.Size(306, 166);
             this.gpbModo.TabIndex = 3;
             this.gpbModo.TabStop = false;
             this.gpbModo.Text = "MODO";
@@ -145,17 +160,18 @@ namespace app_servicio_SADS2
             // 
             // btnAjustes
             // 
+            this.btnAjustes.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnAjustes.Image = global::app_servicio_SADS2.Properties.Resources.icons8_ajustes_48;
-            this.btnAjustes.Location = new System.Drawing.Point(275, 108);
+            this.btnAjustes.Location = new System.Drawing.Point(232, 108);
             this.btnAjustes.Name = "btnAjustes";
-            this.btnAjustes.Size = new System.Drawing.Size(52, 52);
+            this.btnAjustes.Size = new System.Drawing.Size(52, 47);
             this.btnAjustes.TabIndex = 14;
             this.btnAjustes.UseVisualStyleBackColor = true;
             this.btnAjustes.Click += new System.EventHandler(this.btnAjustes_Click);
             // 
             // ptbIndicador2
             // 
-            this.ptbIndicador2.Location = new System.Drawing.Point(201, 119);
+            this.ptbIndicador2.Location = new System.Drawing.Point(164, 114);
             this.ptbIndicador2.Name = "ptbIndicador2";
             this.ptbIndicador2.Size = new System.Drawing.Size(39, 41);
             this.ptbIndicador2.TabIndex = 13;
@@ -165,7 +181,7 @@ namespace app_servicio_SADS2
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(242, 24);
+            this.label3.Location = new System.Drawing.Point(170, 24);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(70, 16);
             this.label3.TabIndex = 4;
@@ -182,24 +198,15 @@ namespace app_servicio_SADS2
             // 
             // btnPararAuto
             // 
-            this.btnPararAuto.Location = new System.Drawing.Point(17, 119);
+            this.btnPararAuto.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(157)))), ((int)(((byte)(209)))));
+            this.btnPararAuto.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnPararAuto.Location = new System.Drawing.Point(18, 108);
             this.btnPararAuto.Name = "btnPararAuto";
             this.btnPararAuto.Size = new System.Drawing.Size(126, 41);
             this.btnPararAuto.TabIndex = 2;
             this.btnPararAuto.Text = "PARAR";
             this.btnPararAuto.UseVisualStyleBackColor = true;
             this.btnPararAuto.Click += new System.EventHandler(this.btnPararAuto_Click);
-            // 
-            // button1
-            // 
-            this.button1.ImageIndex = 7;
-            this.button1.ImageList = this.iglImagenes;
-            this.button1.Location = new System.Drawing.Point(809, 448);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(38, 34);
-            this.button1.TabIndex = 17;
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click_1);
             // 
             // iglImagenes
             // 
@@ -228,7 +235,7 @@ namespace app_servicio_SADS2
             // 
             this.lblTemporal2.AutoSize = true;
             this.lblTemporal2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblTemporal2.Location = new System.Drawing.Point(399, 148);
+            this.lblTemporal2.Location = new System.Drawing.Point(30, 78);
             this.lblTemporal2.Name = "lblTemporal2";
             this.lblTemporal2.Size = new System.Drawing.Size(35, 15);
             this.lblTemporal2.TabIndex = 15;
@@ -280,6 +287,7 @@ namespace app_servicio_SADS2
             this.gpbModoManual.Controls.Add(this.ckbExcel);
             this.gpbModoManual.Controls.Add(this.btnCrearExcel);
             this.gpbModoManual.Controls.Add(this.cmbManualMaquina);
+            this.gpbModoManual.Controls.Add(this.btnBusquedaFecha);
             this.gpbModoManual.Controls.Add(this.cmbManualSoldadura);
             this.gpbModoManual.Controls.Add(this.rdbHorafinal);
             this.gpbModoManual.Controls.Add(this.rdbHorainicial);
@@ -290,11 +298,10 @@ namespace app_servicio_SADS2
             this.gpbModoManual.Controls.Add(this.lable1);
             this.gpbModoManual.Controls.Add(this.txbManualFecha);
             this.gpbModoManual.Controls.Add(this.btnGuardarExcel);
-            this.gpbModoManual.Controls.Add(this.btnBusquedaFecha);
             this.gpbModoManual.Controls.Add(this.txbManualHoraFinal);
             this.gpbModoManual.Controls.Add(this.txbManualHoraInicial);
             this.gpbModoManual.Font = new System.Drawing.Font("Nirmala UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.gpbModoManual.Location = new System.Drawing.Point(14, 285);
+            this.gpbModoManual.Location = new System.Drawing.Point(4, 257);
             this.gpbModoManual.Name = "gpbModoManual";
             this.gpbModoManual.Size = new System.Drawing.Size(345, 191);
             this.gpbModoManual.TabIndex = 7;
@@ -302,6 +309,9 @@ namespace app_servicio_SADS2
             // 
             // btnReportesDia
             // 
+            this.btnReportesDia.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(188)))), ((int)(((byte)(229)))), ((int)(((byte)(252)))));
+            this.btnReportesDia.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(243)))), ((int)(((byte)(252)))));
+            this.btnReportesDia.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnReportesDia.ImageAlign = System.Drawing.ContentAlignment.BottomCenter;
             this.btnReportesDia.ImageIndex = 2;
             this.btnReportesDia.ImageList = this.iglImagenes;
@@ -311,7 +321,7 @@ namespace app_servicio_SADS2
             this.btnReportesDia.TabIndex = 16;
             this.btnReportesDia.Text = "R_DIA";
             this.btnReportesDia.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.btnReportesDia.UseVisualStyleBackColor = true;
+            this.btnReportesDia.UseVisualStyleBackColor = false;
             this.btnReportesDia.Click += new System.EventHandler(this.btnReportesDia_Click);
             // 
             // ckbExcel
@@ -328,6 +338,9 @@ namespace app_servicio_SADS2
             // 
             // btnCrearExcel
             // 
+            this.btnCrearExcel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(188)))), ((int)(((byte)(229)))), ((int)(((byte)(252)))));
+            this.btnCrearExcel.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(243)))), ((int)(((byte)(252)))));
+            this.btnCrearExcel.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnCrearExcel.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnCrearExcel.ImageIndex = 1;
             this.btnCrearExcel.ImageList = this.iglImagenes;
@@ -336,12 +349,13 @@ namespace app_servicio_SADS2
             this.btnCrearExcel.Size = new System.Drawing.Size(92, 24);
             this.btnCrearExcel.TabIndex = 14;
             this.btnCrearExcel.Text = "EXCEL";
-            this.btnCrearExcel.UseVisualStyleBackColor = true;
+            this.btnCrearExcel.UseVisualStyleBackColor = false;
             this.btnCrearExcel.Click += new System.EventHandler(this.btnCrearExcel_Click);
             // 
             // cmbManualMaquina
             // 
             this.cmbManualMaquina.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbManualMaquina.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cmbManualMaquina.FormattingEnabled = true;
             this.cmbManualMaquina.Location = new System.Drawing.Point(17, 86);
             this.cmbManualMaquina.Name = "cmbManualMaquina";
@@ -349,9 +363,28 @@ namespace app_servicio_SADS2
             this.cmbManualMaquina.TabIndex = 1;
             this.cmbManualMaquina.SelectedIndexChanged += new System.EventHandler(this.cmbManualMaquina_SelectedIndexChanged);
             // 
+            // btnBusquedaFecha
+            // 
+            this.btnBusquedaFecha.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(188)))), ((int)(((byte)(229)))), ((int)(((byte)(252)))));
+            this.btnBusquedaFecha.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnBusquedaFecha.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(243)))), ((int)(((byte)(252)))));
+            this.btnBusquedaFecha.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnBusquedaFecha.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnBusquedaFecha.ImageIndex = 10;
+            this.btnBusquedaFecha.ImageList = this.iglImagenes;
+            this.btnBusquedaFecha.Location = new System.Drawing.Point(20, 161);
+            this.btnBusquedaFecha.Name = "btnBusquedaFecha";
+            this.btnBusquedaFecha.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.btnBusquedaFecha.Size = new System.Drawing.Size(92, 24);
+            this.btnBusquedaFecha.TabIndex = 4;
+            this.btnBusquedaFecha.Text = "BUSCAR";
+            this.btnBusquedaFecha.UseVisualStyleBackColor = false;
+            this.btnBusquedaFecha.Click += new System.EventHandler(this.btnBusquedaFecha_Click);
+            // 
             // cmbManualSoldadura
             // 
             this.cmbManualSoldadura.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbManualSoldadura.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cmbManualSoldadura.FormattingEnabled = true;
             this.cmbManualSoldadura.Location = new System.Drawing.Point(16, 38);
             this.cmbManualSoldadura.Name = "cmbManualSoldadura";
@@ -433,6 +466,9 @@ namespace app_servicio_SADS2
             // 
             // btnGuardarExcel
             // 
+            this.btnGuardarExcel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(188)))), ((int)(((byte)(229)))), ((int)(((byte)(252)))));
+            this.btnGuardarExcel.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(225)))), ((int)(((byte)(243)))), ((int)(((byte)(252)))));
+            this.btnGuardarExcel.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnGuardarExcel.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnGuardarExcel.ImageIndex = 13;
             this.btnGuardarExcel.ImageList = this.iglImagenes;
@@ -442,23 +478,8 @@ namespace app_servicio_SADS2
             this.btnGuardarExcel.TabIndex = 5;
             this.btnGuardarExcel.Text = "GUARDAR";
             this.btnGuardarExcel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.btnGuardarExcel.UseVisualStyleBackColor = true;
+            this.btnGuardarExcel.UseVisualStyleBackColor = false;
             this.btnGuardarExcel.Click += new System.EventHandler(this.btnGuardarExcel_Click);
-            // 
-            // btnBusquedaFecha
-            // 
-            this.btnBusquedaFecha.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnBusquedaFecha.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnBusquedaFecha.ImageIndex = 10;
-            this.btnBusquedaFecha.ImageList = this.iglImagenes;
-            this.btnBusquedaFecha.Location = new System.Drawing.Point(20, 163);
-            this.btnBusquedaFecha.Name = "btnBusquedaFecha";
-            this.btnBusquedaFecha.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.btnBusquedaFecha.Size = new System.Drawing.Size(92, 24);
-            this.btnBusquedaFecha.TabIndex = 4;
-            this.btnBusquedaFecha.Text = "BUSCAR";
-            this.btnBusquedaFecha.UseVisualStyleBackColor = true;
-            this.btnBusquedaFecha.Click += new System.EventHandler(this.btnBusquedaFecha_Click);
             // 
             // txbManualHoraFinal
             // 
@@ -482,10 +503,10 @@ namespace app_servicio_SADS2
             this.tssLMinutosMon,
             this.tssLNumeroArchivos,
             this.tssLCarpeta});
-            this.stsEstado.Location = new System.Drawing.Point(0, 485);
+            this.stsEstado.Location = new System.Drawing.Point(0, 457);
             this.stsEstado.Name = "stsEstado";
             this.stsEstado.Padding = new System.Windows.Forms.Padding(2, 0, 14, 0);
-            this.stsEstado.Size = new System.Drawing.Size(859, 22);
+            this.stsEstado.Size = new System.Drawing.Size(374, 22);
             this.stsEstado.TabIndex = 8;
             this.stsEstado.Text = "En espera... ";
             // 
@@ -516,7 +537,8 @@ namespace app_servicio_SADS2
             // lblTemporal
             // 
             this.lblTemporal.AutoSize = true;
-            this.lblTemporal.BackColor = System.Drawing.Color.Transparent;
+            this.lblTemporal.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(153)))), ((int)(((byte)(180)))), ((int)(((byte)(209)))));
+            this.lblTemporal.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.lblTemporal.Location = new System.Drawing.Point(399, 461);
             this.lblTemporal.Name = "lblTemporal";
             this.lblTemporal.Size = new System.Drawing.Size(39, 13);
@@ -585,48 +607,118 @@ namespace app_servicio_SADS2
             this.tmrMonitoreo.Interval = 1000;
             this.tmrMonitoreo.Tick += new System.EventHandler(this.tmrMonitoreo_Tick);
             // 
+            // panel2
+            // 
+            this.panel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(153)))), ((int)(((byte)(180)))), ((int)(((byte)(209)))));
+            this.panel2.Controls.Add(this.button1);
+            this.panel2.Controls.Add(this.panel3);
+            this.panel2.Controls.Add(this.PnlBarraTitulo);
+            this.panel2.Controls.Add(this.lblTemporal2);
+            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel2.Location = new System.Drawing.Point(0, 0);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(859, 507);
+            this.panel2.TabIndex = 19;
+            // 
+            // button1
+            // 
+            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button1.ImageIndex = 7;
+            this.button1.ImageList = this.iglImagenes;
+            this.button1.Location = new System.Drawing.Point(800, 448);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(38, 34);
+            this.button1.TabIndex = 17;
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click_1);
+            // 
+            // panel3
+            // 
+            this.panel3.BackColor = System.Drawing.SystemColors.ActiveCaption;
+            this.panel3.Controls.Add(this.stsEstado);
+            this.panel3.Controls.Add(this.gpbModo);
+            this.panel3.Controls.Add(this.pictureBox1);
+            this.panel3.Controls.Add(this.gpbModoManual);
+            this.panel3.Dock = System.Windows.Forms.DockStyle.Left;
+            this.panel3.Location = new System.Drawing.Point(0, 28);
+            this.panel3.Name = "panel3";
+            this.panel3.Size = new System.Drawing.Size(374, 479);
+            this.panel3.TabIndex = 17;
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.BackColor = System.Drawing.Color.Transparent;
+            this.pictureBox1.Image = global::app_servicio_SADS2.Properties.Resources.logo_1;
+            this.pictureBox1.Location = new System.Drawing.Point(71, 6);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(157, 73);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox1.TabIndex = 4;
+            this.pictureBox1.TabStop = false;
+            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
+            // 
+            // PnlBarraTitulo
+            // 
+            this.PnlBarraTitulo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(100)))), ((int)(((byte)(182)))));
+            this.PnlBarraTitulo.Controls.Add(this.PtbMinimizar);
+            this.PnlBarraTitulo.Controls.Add(this.PtbCerrar);
+            this.PnlBarraTitulo.Dock = System.Windows.Forms.DockStyle.Top;
+            this.PnlBarraTitulo.Location = new System.Drawing.Point(0, 0);
+            this.PnlBarraTitulo.Name = "PnlBarraTitulo";
+            this.PnlBarraTitulo.Size = new System.Drawing.Size(859, 28);
+            this.PnlBarraTitulo.TabIndex = 16;
+            this.PnlBarraTitulo.MouseMove += new System.Windows.Forms.MouseEventHandler(this.PnlBarraTitulo_MouseMove);
+            // 
+            // PtbMinimizar
+            // 
+            this.PtbMinimizar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.PtbMinimizar.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.PtbMinimizar.Image = global::app_servicio_SADS2.Properties.Resources.Minimize;
+            this.PtbMinimizar.Location = new System.Drawing.Point(800, 3);
+            this.PtbMinimizar.Name = "PtbMinimizar";
+            this.PtbMinimizar.Size = new System.Drawing.Size(16, 16);
+            this.PtbMinimizar.TabIndex = 2;
+            this.PtbMinimizar.TabStop = false;
+            this.PtbMinimizar.Click += new System.EventHandler(this.PtbMinimizar_Click);
+            // 
+            // PtbCerrar
+            // 
+            this.PtbCerrar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.PtbCerrar.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.PtbCerrar.Image = global::app_servicio_SADS2.Properties.Resources.Close;
+            this.PtbCerrar.Location = new System.Drawing.Point(831, 3);
+            this.PtbCerrar.Name = "PtbCerrar";
+            this.PtbCerrar.Size = new System.Drawing.Size(16, 16);
+            this.PtbCerrar.TabIndex = 0;
+            this.PtbCerrar.TabStop = false;
+            this.PtbCerrar.Click += new System.EventHandler(this.PtbCerrar_Click);
+            // 
             // ptbIndicador1
             // 
+            this.ptbIndicador1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(153)))), ((int)(((byte)(180)))), ((int)(((byte)(209)))));
             this.ptbIndicador1.Location = new System.Drawing.Point(782, 147);
             this.ptbIndicador1.Name = "ptbIndicador1";
             this.ptbIndicador1.Size = new System.Drawing.Size(34, 16);
             this.ptbIndicador1.TabIndex = 12;
             this.ptbIndicador1.TabStop = false;
             // 
-            // pictureBox1
-            // 
-            this.pictureBox1.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBox1.Image = global::app_servicio_SADS2.Properties.Resources.logo_1;
-            this.pictureBox1.Location = new System.Drawing.Point(27, 11);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(310, 93);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox1.TabIndex = 4;
-            this.pictureBox1.TabStop = false;
-            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
-            // 
             // frmPrincipal
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.InactiveCaption;
+            this.BackColor = System.Drawing.SystemColors.Control;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(859, 507);
-            this.Controls.Add(this.button1);
-            this.Controls.Add(this.lblTemporal2);
             this.Controls.Add(this.ltbTemporal2);
             this.Controls.Add(this.ptbIndicador1);
             this.Controls.Add(this.dgvTablaExcel);
             this.Controls.Add(this.ltbTemporal);
             this.Controls.Add(this.lblTemporal);
-            this.Controls.Add(this.stsEstado);
-            this.Controls.Add(this.gpbModoManual);
             this.Controls.Add(this.ltbArchivosExcel);
             this.Controls.Add(this.dgvDatosTabla);
-            this.Controls.Add(this.pictureBox1);
-            this.Controls.Add(this.gpbModo);
+            this.Controls.Add(this.panel2);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "frmPrincipal";
@@ -644,8 +736,15 @@ namespace app_servicio_SADS2
             this.stsEstado.ResumeLayout(false);
             this.stsEstado.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvTablaExcel)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ptbIndicador1)).EndInit();
+            this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
+            this.panel3.ResumeLayout(false);
+            this.panel3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.PnlBarraTitulo.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.PtbMinimizar)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.PtbCerrar)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ptbIndicador1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -697,6 +796,11 @@ namespace app_servicio_SADS2
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.CheckBox ckbExcel;
         private System.Windows.Forms.Button btnReportesDia;
+        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.Panel PnlBarraTitulo;
+        private System.Windows.Forms.PictureBox PtbMinimizar;
+        private System.Windows.Forms.PictureBox PtbCerrar;
     }
 }
 
