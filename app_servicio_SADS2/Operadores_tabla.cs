@@ -14,7 +14,7 @@ namespace app_servicio_SADS2
         [JsonProperty("Op_Nombre")]
         public string op_nombre { get; set; }
         [JsonProperty("Op_Clave_soldador")]
-        public int op_clave_soldador { get; set; }
+        public string op_clave_soldador { get; set; }
         [JsonProperty("Op_Puesto")]
         public string op_puesto { get; set; }
     }

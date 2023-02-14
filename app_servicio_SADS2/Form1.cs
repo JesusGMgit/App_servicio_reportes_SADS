@@ -25,7 +25,8 @@ namespace app_servicio_SADS2
         string path_reportes_excel = @"C:\xampp\htdocs\Reportes\";
         int P_contador_tmr = 0, P_numero_minutos = 1;
         DateTime P_hora_anterior = new DateTime(2008, 08, 08, 08, 08, 08);
-        DateTime P_hora_now, P_hora_registro_anterior, P_temporal_datetime, P_fecha_ayer;
+        //DateTime P_hora_registro_anterior, P_temporal_datetime;
+        DateTime P_hora_now, P_fecha_ayer;
         DataTable P_Tuberia_datatable = new DataTable();
         DataTable P_tuberia_datatable_ayer = new DataTable();
         DataTable P_proyecto_datatable = new DataTable();
@@ -34,6 +35,13 @@ namespace app_servicio_SADS2
         DataView P_tuberia_dataview;
         bool P_manual, P_registro_nuevo_archivo, P_auto_un_registro, P_no_hay_archivos_ayer=true;
         string P_fecha_busqueda, P_url_get, P_url_update, P_url_insert, P_ID_tubo;
+        //varaibles url
+        string P_url_interna1 = "http://10.10.20.15/backend/api/ar_tTuberiaInterna_1.php";
+        string P_url_interna2 = "http://10.10.20.15/backend/api/ar_tTuberiaInterna_2.php";
+        string P_url_interna3 = "http://10.10.20.15/backend/api/ar_tTuberiaInterna_3.php";
+        string P_url_externa1 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_1.php";
+        string P_url_externa2 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_2.php";
+        string P_url_externa3 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_3.php";
         public frmPrincipal()
         {
             InitializeComponent();
@@ -242,8 +250,8 @@ namespace app_servicio_SADS2
 
                 Dictionary<string, string> diccionario = new Dictionary<string, string>
                 {
-                    {"A_ID_tubo", P_ID_tubo },
-                    {"Archivos_excel", archivos_excel},
+                    {"T_ID_tubo", P_ID_tubo },
+                    {"T_Archivos_excel", archivos_excel},
                 };
                 //var values = diccionario;
 
@@ -265,13 +273,13 @@ namespace app_servicio_SADS2
         //funcion para guaradar nombres de los archivos excel
         void Actualizar_Reporte_excel(string nombre_reporte, string maquina_reporte)
         {
-            string url_reporte, url;
+            string url_reporte;
             string id_tubo = dgvDatosTabla.Rows[0].Cells[0].Value.ToString();
 
             Dictionary<string, string> diccionario = new Dictionary<string, string>
                 {
-                    {"A_id_tubo", id_tubo },
-                    {"A_nombre_reporte", nombre_reporte+".xlsx"},
+                    {"T_ID_tubo", id_tubo },
+                    {"T_Reporte_excel", nombre_reporte+".xlsx"},
                 };
 
             var content = new FormUrlEncodedContent(diccionario);
@@ -279,27 +287,27 @@ namespace app_servicio_SADS2
             switch (maquina_reporte)
             {
                 case "INTERNA1":
-                    url_reporte = "http://10.10.20.15/api/internas/rq_tTuberiaInterna_1.php";
+                    url_reporte = P_url_interna1;
                     cliente.PostAsync(url_reporte, content);
                     break;
                 case "INTERNA2":
-                    url_reporte = "http://10.10.20.15/api/internas/rq_tTuberiaInterna_2.php";
+                    url_reporte = P_url_interna2;
                     cliente.PostAsync(url_reporte, content);
                     break;
                 case "INTERNA3":
-                    url_reporte = "http://10.10.20.15/api/internas/rq_tTuberiaInterna_3.php";
+                    url_reporte = P_url_interna3;
                     cliente.PostAsync(url_reporte, content);
                     break;
                 case "EXTERNA1":
-                    url_reporte = "http://10.10.20.15/api/externas/rq_tTuberiaExterna_1.php";
+                    url_reporte = P_url_externa1;
                     cliente.PostAsync(url_reporte, content);
                     break;
                 case "EXTERNA2":
-                    url_reporte = "http://10.10.20.15/api/externas/rq_tTuberiaExterna_2.php";
+                    url_reporte = P_url_externa2;
                     cliente.PostAsync(url_reporte, content);
                     break;
                 case "EXTERNA3":
-                    url_reporte = "http://10.10.20.15/api/externas/rq_tTuberiaExterna_3.php";
+                    url_reporte = P_url_externa3;
                     cliente.PostAsync(url_reporte, content);
                     break;
                 default:
@@ -357,7 +365,7 @@ namespace app_servicio_SADS2
 
                 var output = GetApiData(P_url_get);
 
-                if (soldadura == "INTERNA" || soldadura =="in")
+                if ((output != "null")&&(soldadura == "INTERNA" || soldadura =="in"))
                 {
                     List<Tuberia_interna_tabla> temporal_results = JsonConvert.DeserializeObject<List<Tuberia_interna_tabla>>(output);
                     foreach (var r in temporal_results)
@@ -441,7 +449,7 @@ namespace app_servicio_SADS2
 
         void Rellenar_tabla_proyectos(string nom_proyecto)
         {
-            string url_proyecto = "http://10.10.20.15/api/rq_tProyectos.php?id=" + nom_proyecto;
+            string url_proyecto = "http://10.10.20.15/backend/api/ar_tProyectos.php?Pro_ID" + nom_proyecto;
             var resultado_proyecto=GetApiData(url_proyecto);
             List<Proyecto_tabla> temporal_results = JsonConvert.DeserializeObject<List<Proyecto_tabla>>(resultado_proyecto);
             foreach (var r in temporal_results)
@@ -482,16 +490,16 @@ namespace app_servicio_SADS2
             {
                 if (maquina_fecha == "INTERNA1")
                 {
-                    P_url_get = "http://10.10.20.15/api/internas/rq_tTuberiaInterna_1.php?fecha=" + fecha_temporal;
+                    P_url_get = P_url_interna1+ "?T_Fecha=" + fecha_temporal;
 
                 }
                 else if (maquina_fecha == "INTERNA2")
                 {
-                    P_url_get = "http://10.10.20.15/api/internas/rq_tTuberiaInterna_2.php?fecha=" + fecha_temporal;
+                    P_url_get = P_url_interna2 + "?T_Fecha=" + fecha_temporal;
                 }
                 else
                 {
-                    P_url_get = "http://10.10.20.15/api/internas/rq_tTuberiaInterna_3.php?fecha=" + fecha_temporal;
+                    P_url_get = P_url_interna3 + "?T_Fecha=" + fecha_temporal;
                 }
 
             }
@@ -499,15 +507,15 @@ namespace app_servicio_SADS2
             {
                 if (maquina_fecha == "EXTERNA1")
                 {
-                    P_url_get = "http://10.10.20.15/api/externas/rq_tTuberiaExterna_1.php?fecha=" + fecha_temporal;
+                    P_url_get = P_url_externa1 + "?T_Fecha=" + fecha_temporal;
                 }
                 else if (maquina_fecha == "EXTERNA2")
                 {
-                    P_url_get = "http://10.10.20.15/api/externas/rq_tTuberiaExterna_2.php?fecha=" + fecha_temporal;
+                    P_url_get = P_url_externa2 + "?T_Fecha=" + fecha_temporal;
                 }
                 else
                 {
-                    P_url_get = "http://10.10.20.15/api/externas/rq_tTuberiaExterna_3.php?fecha=" + fecha_temporal;
+                    P_url_get = P_url_externa3 + "?T_Fecha=" + fecha_temporal;
                 }
 
             }
@@ -540,16 +548,16 @@ namespace app_servicio_SADS2
             {
                 if (maquina_poleo == "INTERNA1")
                 {
-                    url_get = "http://10.10.20.15/api/internas/rq_tTuberiaInterna_1.php?fecha=" + fecha_temporal;
+                    url_get = P_url_interna1 + "?T_Fecha=" + fecha_temporal;
 
                 }
                 else if (maquina_poleo == "INTERNA2")
                 {
-                    url_get = "http://10.10.20.15/api/internas/rq_tTuberiaInterna_2.php?fecha=" + fecha_temporal;
+                    url_get = P_url_interna2 + "?T_Fecha=" + fecha_temporal;
                 }
                 else
                 {
-                    url_get = "http://10.10.20.15/api/internas/rq_tTuberiaInterna_3.php?fecha=" + fecha_temporal;
+                    url_get = P_url_interna3 + "?T_Fecha=" + fecha_temporal;
                 }
 
             }
@@ -557,15 +565,15 @@ namespace app_servicio_SADS2
             {
                 if (maquina_poleo == "EXTERNA1")
                 {
-                    url_get = "http://10.10.20.15/api/externas/rq_tTuberiaExterna_1.php?fecha=" + fecha_temporal;
+                    url_get = P_url_externa1 + "?T_Fecha=" + fecha_temporal;
                 }
                 else if (maquina_poleo == "EXTERNA2")
                 {
-                    url_get = "http://10.10.20.15/api/externas/rq_tTuberiaExterna_2.php?fecha=" + fecha_temporal;
+                    url_get = P_url_externa2 + "?T_Fecha=" + fecha_temporal;
                 }
                 else
                 {
-                    url_get = "http://10.10.20.15/api/externas/rq_tTuberiaExterna_3.php?fecha=" + fecha_temporal;
+                    url_get = P_url_externa3 + "?T_Fecha=" + fecha_temporal;
                 }
 
             }
@@ -623,15 +631,12 @@ namespace app_servicio_SADS2
             //Rutina para buscar archivos excel y registros tuberia por cada maquina
 
             //maquinas de soldadura interna
-            //P_url_update = "http://10.10.20.15/api/rq_tTuberia_soldadura_interna.php?opc=1";
             ptbIndicadorA.Image = iglImagenes.Images[16];
             Busqueda_archivos_maquina("MONITOREO_INTERNA1", "INTERNA1", "in");
             Busqueda_archivos_maquina("MONITOREO_INTERNA2", "INTERNA2", "in");
             Busqueda_archivos_maquina("MONITOREO_INTERNA3", "INTERNA3", "in");
 
             //maquinas de soldadura externa
-            //P_url_update = "http://10.10.20.15/api/rq_tTuberia_soldadura_externa.php?opc=1";
-            
             Busqueda_archivos_maquina("MONITOREO_EXTERNA1", "EXTERNA1", "ex");
             Busqueda_archivos_maquina("MONITOREO_EXTERNA2", "EXTERNA2", "ex");
             Busqueda_archivos_maquina("MONITOREO_EXTERNA3", "EXTERNA3", "ex");
@@ -660,10 +665,12 @@ namespace app_servicio_SADS2
             tssLCarpeta.Text = carpeta_maquina;
             
             lblTemporal2.Text = nom_maquina;
+            //LIMPIO LA TABLA DONDE SE ALAMCENAN 
             Limpiar_tabla_fecha(m_exin,nom_maquina);
             path_temporal = pathP + carpeta_maquina+"\\";
             //lblTemporal2.Text = path_temporal;
             //dgvDatosTabla.Rows.Clear();
+            //CARGO EL DATAGRID CON LOS DATOS DE TUBERIA DE LA MAQUINA Y FECHA SELECCIONADA
             dgvDatosTabla.DataSource = P_Tuberia_datatable;
             
             if (dgvDatosTabla.Rows.Count != 0)
@@ -671,6 +678,7 @@ namespace app_servicio_SADS2
                 tssLNumeroArchivos.Text = dgvDatosTabla.Rows.Count.ToString();
                 Llenar_tabla_datos_ayer(m_exin,nom_maquina);
                 ltbTemporal2.Items.Clear();
+                //CHECAR SI HAY ARCHIVOS DEL DIA ANTERIOR
                 if (P_no_hay_archivos_ayer==false)
                 {
                     
@@ -790,15 +798,15 @@ namespace app_servicio_SADS2
             {
                 if (maquina == "INTERNA1")
                 {
-                    P_url_update = "http://10.10.20.15/api/internas/rq_tTuberiaInterna_1.php";
+                    P_url_update = P_url_interna1;
                 }
                 else if (maquina == "INTERNA2")
                 {
-                    P_url_update = "http://10.10.20.15/api/internas/rq_tTuberiaInterna_2.php";
+                    P_url_update = P_url_interna2;
                 }
                 else
                 {
-                    P_url_update = "http://10.10.20.15/api/internas/rq_tTuberiaInterna_3.php";
+                    P_url_update = P_url_interna3;
                 }
 
             }
@@ -806,15 +814,15 @@ namespace app_servicio_SADS2
             {
                 if (maquina == "EXTERNA1")
                 {
-                    P_url_update = "http://10.10.20.15/api/externas/rq_tTuberiaExterna_1.php";
+                    P_url_update = P_url_externa1;
                 }
                 else if (maquina == "EXTERNA2")
                 {
-                    P_url_update = "http://10.10.20.15/api/externas/rq_tTuberiaExterna_2.php";
+                    P_url_update = P_url_externa2;
                 }
                 else
                 {
-                    P_url_update = "http://10.10.20.15/api/externas/rq_tTuberiaExterna_3.php";
+                    P_url_update = P_url_externa3;
                 }
 
             }
@@ -822,6 +830,11 @@ namespace app_servicio_SADS2
             for (int i = 0; i < dgvDatosTabla.Rows.Count; i++)
             {
                 temporal_string = dgvDatosTabla.Rows[i].Cells[10].Value.ToString();
+                if (ckbREnombre.Checked)
+                {
+                    temporal_string = "";
+                }
+                
                 if (temporal_string == "")
                 {
                     //buscar archivos excel dentro del rango de hora
@@ -922,6 +935,7 @@ namespace app_servicio_SADS2
             lblTemporal.Text = s_temporal_string;
             if (P_manual == true)
             {
+                /*
                 if (P_registro_nuevo_archivo == true)
                 {
                     InsertApiData(P_url_insert, s_temporal_string);
@@ -930,6 +944,8 @@ namespace app_servicio_SADS2
                 {
                     UpdateApiData(P_url_update, s_temporal_string);
                 }
+                */
+                UpdateApiData(P_url_update, s_temporal_string);
 
             }
             else
@@ -1067,7 +1083,7 @@ namespace app_servicio_SADS2
                 P_hora_now = DateTime.Now;
                 P_fecha_busqueda = P_hora_now.ToString("yyyy/MM/dd");
                 tssLEstado.Text = "Modo Automatico";
-                P_temporal_datetime = P_hora_registro_anterior;
+                //P_temporal_datetime = P_hora_registro_anterior;
                 P_manual = false;
                 btnIniciarAuto.Enabled = false;
                 btnPararAuto.Enabled = true;
@@ -1126,7 +1142,7 @@ namespace app_servicio_SADS2
             string manual_carpeta = "MONITOREO_" + cmbManualMaquina.Text;
             
             path_temporal = pathP + "MONITOREO_" + cmbManualMaquina.Text + "\\";
-      
+            /*      
             if (dgvDatosTabla.Rows.Count == 0)
             {
                 P_registro_nuevo_archivo = true;
@@ -1135,6 +1151,7 @@ namespace app_servicio_SADS2
             {
                 P_registro_nuevo_archivo = false;
             }
+            */
             //limpiar la lista de no,bres de archivos excel
             ltbArchivosExcel.Items.Clear();
             //buscar archivos excel en la fecha dada
@@ -1171,15 +1188,15 @@ namespace app_servicio_SADS2
                 {
                     if (cmbManualMaquina.Text == "INTERNA1")
                     {
-                        P_url_update = "http://10.10.20.15/api/internas/rq_tTuberiaInterna_1.php";
+                        P_url_update = P_url_interna1;
                     }
                     else if (cmbManualMaquina.Text == "INTERNA2")
                     {
-                        P_url_update = "http://10.10.20.15/api/internas/rq_tTuberiaInterna_2.php";
+                        P_url_update =P_url_interna2;
                     }
                     else
                     {
-                        P_url_update = "http://10.10.20.15/api/internas/rq_tTuberiaInterna_3.php";
+                        P_url_update = P_url_interna3;
                     }
                     
                 }
@@ -1187,15 +1204,15 @@ namespace app_servicio_SADS2
                 {
                     if (cmbManualMaquina.Text == "EXTERNA1")
                     {
-                        P_url_update = "http://10.10.20.15/api/externas/rq_tTuberiaExterna_1.php";
+                        P_url_update = P_url_externa1;
                     }
                     else if (cmbManualMaquina.Text == "EXTERNA2")
                     {
-                        P_url_update = "http://10.10.20.15/api/externas/rq_tTuberiaExterna_2.php";
+                        P_url_update = P_url_externa2;
                     }
                     else
                     {
-                        P_url_update = "http://10.10.20.15/api/externas/rq_tTuberiaExterna_3.php";
+                        P_url_update = P_url_externa3;
                     }
                     
                 }
@@ -1381,7 +1398,7 @@ namespace app_servicio_SADS2
             rt_sheet.Range["I14"].Value = P_operador_datatable.Rows[0]["Folio"].ToString();
             rt_sheet.Range["I14"].Font.Bold = true;
             rt_sheet.Range["K14"].Value = "CS-";
-            rt_sheet.Range["L14"].Value = P_operador_datatable.Rows[0]["Clave_soldador"].ToString();
+            rt_sheet.Range["L14"].Value = P_operador_datatable.Rows[0]["Clave_soldador"];
             rt_sheet.Range["L14"].Font.Bold = true;
             rt_sheet.Range["A15"].Value = "SUPERVISOR";
             rt_sheet.Range["C15"].Value = "sin datos";
