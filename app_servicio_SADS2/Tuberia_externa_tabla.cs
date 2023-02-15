@@ -9,32 +9,32 @@ namespace app_servicio_SADS2
 {
     class Tuberia_externa_tabla
     {
-        [JsonProperty("Tex_ID_tubo")]
-        public string Ta_id_tubo { get; set; }
-        [JsonProperty("Tex_No_tubo")]
-        public string Ta_no_tubo { get; set; }
-        [JsonProperty("Tex_No_placa")]
-        public string Ta_no_placa { get; set; }
-        [JsonProperty("Tex_ID_proyecto")]
-        public string Ta_ID_proyecto { get; set; }
-        [JsonProperty("Tex_Lote_alambre")]
-        public string Ta_lote_alambre { get; set; }
-        [JsonProperty("Tex_Lote_fundente")]
-        public string Ta_lote_fundente { get; set; }
-        [JsonProperty("Tex_FolioOperador")]
-        public string Ta_foliooperador { get; set; }
-        [JsonProperty("Tex_Fecha")]
-        public string Ta_fecha { get; set; }
-        [JsonProperty("Tex_Hora")]
-        public string Ta_hora { get; set; }
-        [JsonProperty("Tex_Hora_db")]
-        public DateTime Ta_hora_db { get; set; }
-        [JsonProperty("Tex_Archivos_excel")]
-        public string Ta_Archivos_excel { get; set; }
-        [JsonProperty("Tex_Reporte_excel")]
-        public string Ta_Reporte_excel { get; set; }
-        [JsonProperty("Tex_Observaciones")]
-        public string Ta_Observaciones { get; set; }
+        [JsonProperty("T_ID_tubo")]
+        public string T_ID_tubo { get; set; }
+        [JsonProperty("T_No_tubo")]
+        public string T_No_tubo { get; set; }
+        [JsonProperty("T_No_placa")]
+        public string T_No_placa { get; set; }
+        [JsonProperty("T_ID_proyecto")]
+        public string T_ID_proyecto { get; set; }
+        [JsonProperty("T_Lote_alambre")]
+        public string T_Lote_alambre { get; set; }
+        [JsonProperty("T_Lote_fundente")]
+        public string T_Lote_fundente { get; set; }
+        [JsonProperty("T_FolioOperador")]
+        public string T_Foliooperador { get; set; }
+        [JsonProperty("T_Fecha")]
+        public string T_Fecha { get; set; }
+        [JsonProperty("T_Hora")]
+        public string T_Hora { get; set; }
+        [JsonProperty("T_Hora_db")]
+        public DateTime T_Hora_db { get; set; }
+        [JsonProperty("T_Archivos_excel")]
+        public string T_Archivos_excel { get; set; }
+        [JsonProperty("T_Reporte_excel")]
+        public string T_Reporte_excel { get; set; }
+        [JsonProperty("T_Observaciones")]
+        public string T_Observaciones { get; set; }
 
     }
 }

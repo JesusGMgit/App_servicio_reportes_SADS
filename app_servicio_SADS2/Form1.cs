@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Net.Http;
 using Newtonsoft.Json;
 using System.IO;
-using System.Globalization;
 using System.Threading;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.Runtime.InteropServices;
+using Newtonsoft.Json.Linq;
+using System.Text;
 
 namespace app_servicio_SADS2
 {
@@ -42,6 +39,7 @@ namespace app_servicio_SADS2
         string P_url_externa1 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_1.php";
         string P_url_externa2 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_2.php";
         string P_url_externa3 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_3.php";
+        string version_app="version 1.2.0.9";
         public frmPrincipal()
         {
             InitializeComponent();
@@ -248,16 +246,17 @@ namespace app_servicio_SADS2
             try
             {
 
-                Dictionary<string, string> diccionario = new Dictionary<string, string>
+                Dictionary<string, string> diccionario_archivos_excel = new Dictionary<string, string>
                 {
                     {"T_ID_tubo", P_ID_tubo },
                     {"T_Archivos_excel", archivos_excel},
                 };
                 //var values = diccionario;
 
-                var content = new FormUrlEncodedContent(diccionario);
-
-                var response = cliente.PostAsync(url, content);
+                //var content = new FormUrlEncodedContent(diccionario);
+                var json = JObject.FromObject(diccionario_archivos_excel);
+                var content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+                var response = cliente.PutAsync(url, content);
                 
                 //lblTemporal2.Text = response.Result.ToString();
 
@@ -276,47 +275,47 @@ namespace app_servicio_SADS2
             string url_reporte;
             string id_tubo = dgvDatosTabla.Rows[0].Cells[0].Value.ToString();
 
-            Dictionary<string, string> diccionario = new Dictionary<string, string>
+            Dictionary<string, string> diccionario_update_reporte = new Dictionary<string, string>
                 {
                     {"T_ID_tubo", id_tubo },
                     {"T_Reporte_excel", nombre_reporte+".xlsx"},
                 };
 
-            var content = new FormUrlEncodedContent(diccionario);
+            //var content = new FormUrlEncodedContent(diccionario);
+            var json = JObject.FromObject(diccionario_update_reporte);
+            var content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
 
             switch (maquina_reporte)
             {
                 case "INTERNA1":
                     url_reporte = P_url_interna1;
-                    cliente.PostAsync(url_reporte, content);
+                    cliente.PutAsync(url_reporte, content);
                     break;
                 case "INTERNA2":
                     url_reporte = P_url_interna2;
-                    cliente.PostAsync(url_reporte, content);
+                    cliente.PutAsync(url_reporte, content);
                     break;
                 case "INTERNA3":
                     url_reporte = P_url_interna3;
-                    cliente.PostAsync(url_reporte, content);
+                    cliente.PutAsync(url_reporte, content);
                     break;
                 case "EXTERNA1":
                     url_reporte = P_url_externa1;
-                    cliente.PostAsync(url_reporte, content);
+                    cliente.PutAsync(url_reporte, content);
                     break;
                 case "EXTERNA2":
                     url_reporte = P_url_externa2;
-                    cliente.PostAsync(url_reporte, content);
+                    cliente.PutAsync(url_reporte, content);
                     break;
                 case "EXTERNA3":
                     url_reporte = P_url_externa3;
-                    cliente.PostAsync(url_reporte, content);
+                    cliente.PutAsync(url_reporte, content);
                     break;
                 default:
 
                     break;
             }
-
             //var values = diccionario;
-
         }
 
         #endregion
@@ -371,8 +370,8 @@ namespace app_servicio_SADS2
                     foreach (var r in temporal_results)
                     {
                         
-                        P_Tuberia_datatable.Rows.Add(r.Ta_id_tubo, r.Ta_no_tubo, r.Ta_no_placa, r.Ta_ID_proyecto, r.Ta_lote_alambre,
-                            r.Ta_lote_fundente,r.Ta_foliooperador, r.Ta_fecha, r.Ta_hora, r.Ta_hora_db, r.Ta_Archivos_excel,r.Ta_Observaciones);
+                        P_Tuberia_datatable.Rows.Add(r.T_ID_tubo, r.T_No_tubo, r.T_No_placa, r.T_ID_proyecto, r.T_Lote_alambre,
+                            r.T_Lote_fundente,r.T_Foliooperador, r.T_Fecha, r.T_Hora, r.T_Hora_db, r.T_Archivos_excel,r.T_Observaciones);
 
                     }
                 }
@@ -382,8 +381,8 @@ namespace app_servicio_SADS2
                     foreach (var r in temporal_results)
                     {
                         
-                        P_Tuberia_datatable.Rows.Add(r.Ta_id_tubo, r.Ta_no_tubo, r.Ta_no_placa, r.Ta_ID_proyecto, r.Ta_lote_alambre,
-                            r.Ta_lote_fundente,r.Ta_foliooperador, r.Ta_fecha, r.Ta_hora, r.Ta_hora_db, r.Ta_Archivos_excel,r.Ta_Observaciones);
+                        P_Tuberia_datatable.Rows.Add(r.T_ID_tubo, r.T_No_tubo, r.T_No_placa, r.T_ID_proyecto, r.T_Lote_alambre,
+                            r.T_Lote_fundente,r.T_Foliooperador, r.T_Fecha, r.T_Hora, r.T_Hora_db, r.T_Archivos_excel,r.T_Observaciones);
 
                     }
                 }
@@ -591,8 +590,8 @@ namespace app_servicio_SADS2
                         List<Tuberia_interna_tabla> temporal_results = JsonConvert.DeserializeObject<List<Tuberia_interna_tabla>>(output);
                         foreach (var r in temporal_results)
                         {
-                            P_tuberia_datatable_ayer.Rows.Add(r.Ta_id_tubo, r.Ta_no_tubo, r.Ta_no_placa, r.Ta_ID_proyecto, r.Ta_lote_alambre,
-                                r.Ta_lote_fundente, r.Ta_foliooperador, r.Ta_fecha, r.Ta_hora, r.Ta_hora_db, r.Ta_Archivos_excel, r.Ta_Observaciones);
+                            P_tuberia_datatable_ayer.Rows.Add(r.T_ID_tubo, r.T_No_tubo, r.T_No_placa, r.T_ID_proyecto, r.T_Lote_alambre,
+                                r.T_Lote_fundente, r.T_Foliooperador, r.T_Fecha, r.T_Hora, r.T_Hora_db, r.T_Archivos_excel, r.T_Observaciones);
 
                         }
                     }
@@ -601,8 +600,8 @@ namespace app_servicio_SADS2
                         List<Tuberia_externa_tabla> temporal_results = JsonConvert.DeserializeObject<List<Tuberia_externa_tabla>>(output);
                         foreach (var r in temporal_results)
                         {
-                            P_tuberia_datatable_ayer.Rows.Add(r.Ta_id_tubo, r.Ta_no_tubo, r.Ta_no_placa, r.Ta_ID_proyecto, r.Ta_lote_alambre,
-                                r.Ta_lote_fundente, r.Ta_foliooperador, r.Ta_fecha, r.Ta_hora, r.Ta_hora_db, r.Ta_Archivos_excel, r.Ta_Observaciones);
+                            P_tuberia_datatable_ayer.Rows.Add(r.T_ID_tubo, r.T_No_tubo, r.T_No_placa, r.T_ID_proyecto, r.T_Lote_alambre,
+                                r.T_Lote_fundente, r.T_Foliooperador, r.T_Fecha, r.T_Hora, r.T_Hora_db, r.T_Archivos_excel, r.T_Observaciones);
 
                         }
                     }
@@ -742,7 +741,7 @@ namespace app_servicio_SADS2
 
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Iniciar_datagrid();
                 //MessageBox.Show("error:" + e.ToString());
@@ -1095,6 +1094,7 @@ namespace app_servicio_SADS2
         
         private void frmPrincipal_Load(object sender, EventArgs e)
         {
+            lblVersion.Text = version_app;
             ptbIndicador1.Image = iglImagenes.Images[17];
             ptbIndicador2.Image = iglImagenes.Images[5];
             btnPararAuto.Enabled = false;
