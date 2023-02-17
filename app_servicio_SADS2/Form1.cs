@@ -39,7 +39,9 @@ namespace app_servicio_SADS2
         string P_url_externa1 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_1.php";
         string P_url_externa2 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_2.php";
         string P_url_externa3 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_3.php";
-        string version_app="version 1.2.0.9";
+        string version_app="version 1.2.0.11";
+        
+        //funcion principal
         public frmPrincipal()
         {
             InitializeComponent();
@@ -200,66 +202,50 @@ namespace app_servicio_SADS2
             return responseString;
         }
 
-        public void InsertApiData(string url, string archivos_excel)
+        public string Selecion_url(string maquina)
         {
-            string id_tubo = txbManualHoraInicial.Text;
-            string[] charsToRemove = new string[] { " ", ":", "a", "m", "p" };
-            foreach (var c in charsToRemove)
+            string url_maquina="";
+
+            switch (maquina)
             {
-                id_tubo = id_tubo.Replace(c, string.Empty);
+                case "INTERNA1":
+                    url_maquina = P_url_interna1;
+                    break;
+                case "INTERNA2":
+                    url_maquina = P_url_interna2;
+                    break;
+                case "INTERNA3":
+                    url_maquina = P_url_interna3;
+                    break;
+                case "EXTERNA1":
+                    url_maquina = P_url_externa1;
+                    break;
+                case "EXTERNA2":
+                    url_maquina = P_url_externa2;
+                    break;
+                case "EXTERNA3":
+                    url_maquina = P_url_externa3;
+                    break;
+                default:
+
+                    break;
             }
-            try
-            {
-                var values = new Dictionary<string, string>
-                {
-                    { "T_id_tubo", id_tubo },
-                    { "T_no_tubo", "" },
-                    { "T_no_placa", "" },
-                    { "T_nom_proyecto", "sn proyecto" },
-                    { "T_lote_alambre", "" },
-                    { "T_lote_fundente", "" },
-                    { "T_maquina", cmbManualMaquina.Text },
-                    { "T_fecha", txbManualFecha.Text },
-                    { "T_hora", txbManualHoraFinal.Text },
-                    {"Archivos_excel", archivos_excel},
-
-
-                };
-
-                var content = new FormUrlEncodedContent(values);
-
-                var response = cliente.PostAsync(url, content);
-
-
-            }
-            catch (Exception err)
-            {
-                MessageBox.Show(err.Message);
-
-            }
-
+            return url_maquina;
         }
-
-        public void UpdateApiData(string url, string archivos_excel)
+        public void Actualizar_Archivos_excel(string url, string archivos_excel)
         {
 
             try
             {
-
                 Dictionary<string, string> diccionario_archivos_excel = new Dictionary<string, string>
                 {
                     {"T_ID_tubo", P_ID_tubo },
                     {"T_Archivos_excel", archivos_excel},
                 };
-                //var values = diccionario;
 
-                //var content = new FormUrlEncodedContent(diccionario);
                 var json = JObject.FromObject(diccionario_archivos_excel);
                 var content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
-                var response = cliente.PutAsync(url, content);
-                
-                //lblTemporal2.Text = response.Result.ToString();
-
+                var response = Consultas.Update_API(url, content);
             }
             catch (Exception err)
             {
@@ -272,7 +258,6 @@ namespace app_servicio_SADS2
         //funcion para guaradar nombres de los archivos excel
         void Actualizar_Reporte_excel(string nombre_reporte, string maquina_reporte)
         {
-            string url_reporte;
             string id_tubo = dgvDatosTabla.Rows[0].Cells[0].Value.ToString();
 
             Dictionary<string, string> diccionario_update_reporte = new Dictionary<string, string>
@@ -285,37 +270,8 @@ namespace app_servicio_SADS2
             var json = JObject.FromObject(diccionario_update_reporte);
             var content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
 
-            switch (maquina_reporte)
-            {
-                case "INTERNA1":
-                    url_reporte = P_url_interna1;
-                    cliente.PutAsync(url_reporte, content);
-                    break;
-                case "INTERNA2":
-                    url_reporte = P_url_interna2;
-                    cliente.PutAsync(url_reporte, content);
-                    break;
-                case "INTERNA3":
-                    url_reporte = P_url_interna3;
-                    cliente.PutAsync(url_reporte, content);
-                    break;
-                case "EXTERNA1":
-                    url_reporte = P_url_externa1;
-                    cliente.PutAsync(url_reporte, content);
-                    break;
-                case "EXTERNA2":
-                    url_reporte = P_url_externa2;
-                    cliente.PutAsync(url_reporte, content);
-                    break;
-                case "EXTERNA3":
-                    url_reporte = P_url_externa3;
-                    cliente.PutAsync(url_reporte, content);
-                    break;
-                default:
-
-                    break;
-            }
-            //var values = diccionario;
+            P_url_update = Selecion_url(maquina_reporte);
+            Consultas.Update_API(P_url_update, content);
         }
 
         #endregion
@@ -323,6 +279,60 @@ namespace app_servicio_SADS2
 
         #region funciones para limpiar y llenar las tablas y datagrid del proyecto
 
+        DataTable Ordenar_registros_ampm(DataTable tabla_registros_a_ordenar)
+        {
+            DataTable tuberia_filtro_am = new DataTable();
+            DataTable tuberia_filtro_pm = new DataTable();
+            DataTable tabla_temporal = new DataTable();
+            //Checar si hay datos en la tabla
+            if (tabla_registros_a_ordenar.Rows.Count > 0)
+            {
+                //empezar ordenar tabla por hora con am y pm
+                bool hay_archivos_am = false;
+                P_tuberia_dataview = tabla_registros_a_ordenar.DefaultView;
+                //se oredena en forma ascedente la lista tomando en cuenta la columna
+                //de la base de datos (formato de la maria db)
+                P_tuberia_dataview.Sort = "T_hora_db ASC";
+                tabla_registros_a_ordenar = P_tuberia_dataview.ToTable();
+                tuberia_filtro_am = tabla_registros_a_ordenar;
+                tuberia_filtro_pm = tabla_registros_a_ordenar;
+
+                P_tuberia_dataview = tuberia_filtro_am.DefaultView;
+                P_tuberia_dataview.RowFilter = "T_hora LIKE '%am%'";
+                //si hay un 12 am, mover al principio
+                if (P_tuberia_dataview.Count > 0)
+                {
+                    tuberia_filtro_am = Reacomodar_12(P_tuberia_dataview.ToTable());
+                    tabla_temporal = tuberia_filtro_am;
+                    hay_archivos_am = true;
+                }
+
+
+                P_tuberia_dataview = tuberia_filtro_pm.DefaultView;
+                P_tuberia_dataview.RowFilter = "T_hora LIKE '%pm%'";
+                //si hay un 12 pm, mover al principio
+                if (P_tuberia_dataview.Count > 0)
+                {
+                    tuberia_filtro_pm = Reacomodar_12(P_tuberia_dataview.ToTable());
+                    if (hay_archivos_am == true)
+                    {
+                        foreach (DataRow fila_temp in tuberia_filtro_pm.Rows)
+                        {
+                            tabla_temporal.Rows.Add(fila_temp.ItemArray);
+                        }
+                    }
+                    else
+                    {
+                        tabla_temporal = tuberia_filtro_pm;
+                    }
+                }
+            }
+            else
+            {
+                tabla_temporal = tabla_registros_a_ordenar;
+            }
+            return tabla_temporal;
+        }
         DataTable Reacomodar_12(DataTable tabla_reacomodar)
         {
 
@@ -354,15 +364,12 @@ namespace app_servicio_SADS2
             //llena la tabla de datos para tuberia de los registros solicitados por fecha dada
             
             P_Tuberia_datatable.Rows.Clear();
-            DataTable tuberia_filtro_am = new DataTable();
-            DataTable tuberia_filtro_pm = new DataTable();
-            DataTable tabla_temporal = new DataTable();
             Thread.Sleep(500);
             
             try
             {
 
-                var output = GetApiData(P_url_get);
+                var output = Consultas.Get_API(P_url_get);
 
                 if ((output != "null")&&(soldadura == "INTERNA" || soldadura =="in"))
                 {
@@ -386,6 +393,10 @@ namespace app_servicio_SADS2
 
                     }
                 }
+
+                //ordenar registros por hora 
+                P_Tuberia_datatable = Ordenar_registros_ampm(P_Tuberia_datatable);
+                /*
                 //Checar si hay datos en la tabla
                 if (P_Tuberia_datatable.Rows.Count>0)
                 {
@@ -434,9 +445,10 @@ namespace app_servicio_SADS2
                     tabla_temporal = P_Tuberia_datatable;
                 }
                 
- 
                 P_Tuberia_datatable = tabla_temporal;
-                
+                */
+
+                dgvDatosTabla.DataSource = P_Tuberia_datatable;
             }
             catch (Exception err)
             {
@@ -449,7 +461,7 @@ namespace app_servicio_SADS2
         void Rellenar_tabla_proyectos(string nom_proyecto)
         {
             string url_proyecto = "http://10.10.20.15/backend/api/ar_tProyectos.php?Pro_ID" + nom_proyecto;
-            var resultado_proyecto=GetApiData(url_proyecto);
+            var resultado_proyecto=Consultas.Get_API(url_proyecto);
             List<Proyecto_tabla> temporal_results = JsonConvert.DeserializeObject<List<Proyecto_tabla>>(resultado_proyecto);
             foreach (var r in temporal_results)
             {
@@ -462,7 +474,7 @@ namespace app_servicio_SADS2
         void Rellenar_tabla_operador(string folio_operador)
         {
             string url_operador = "http://10.10.20.15/api/rq_tOperadores.php?id=" + folio_operador;
-            var resultado_operador = GetApiData(url_operador);
+            var resultado_operador = Consultas.Get_API(url_operador);
             
             List<Operadores_tabla> temporal_resultado = JsonConvert.DeserializeObject<List<Operadores_tabla>>(resultado_operador);
             foreach (var r in temporal_resultado)
@@ -484,40 +496,10 @@ namespace app_servicio_SADS2
             //fecha en formato de busqueda en tabla de soldaduras
             DateTime fecha_formato_temporal = Convert.ToDateTime(P_fecha_busqueda);
             string fecha_temporal = fecha_formato_temporal.ToString("dd/MM/yyyy");
+
             //designar a que tabla de soldadura sera guardado el dato del archivo excel
-            if (m_exin == "in" || m_exin == "INTERNA")
-            {
-                if (maquina_fecha == "INTERNA1")
-                {
-                    P_url_get = P_url_interna1+ "?T_Fecha=" + fecha_temporal;
-
-                }
-                else if (maquina_fecha == "INTERNA2")
-                {
-                    P_url_get = P_url_interna2 + "?T_Fecha=" + fecha_temporal;
-                }
-                else
-                {
-                    P_url_get = P_url_interna3 + "?T_Fecha=" + fecha_temporal;
-                }
-
-            }
-            else
-            {
-                if (maquina_fecha == "EXTERNA1")
-                {
-                    P_url_get = P_url_externa1 + "?T_Fecha=" + fecha_temporal;
-                }
-                else if (maquina_fecha == "EXTERNA2")
-                {
-                    P_url_get = P_url_externa2 + "?T_Fecha=" + fecha_temporal;
-                }
-                else
-                {
-                    P_url_get = P_url_externa3 + "?T_Fecha=" + fecha_temporal;
-                }
-
-            }
+            P_url_get = Selecion_url(maquina_fecha) + "?T_Fecha=" + fecha_temporal;
+      
             //rellenar data grid con datos
             Rellenar_tabla_datos(m_exin);
             P_maquina_reporte = maquina_fecha;
@@ -527,7 +509,9 @@ namespace app_servicio_SADS2
         {
             //limpiar tabla de datos de registros de dia anterior en el que se esta trabajando
             P_tuberia_datatable_ayer.Clear();
-
+            DataTable tuberia_filtro_am = new DataTable();
+            DataTable tuberia_filtro_pm = new DataTable();
+            DataTable tabla_temporal = new DataTable();
             //fecha en formato de busqueda en tabla de soldaduras
             string fecha_temporal;
             DateTime fecha_temporal_ayer = Convert.ToDateTime(P_fecha_busqueda);
@@ -541,46 +525,13 @@ namespace app_servicio_SADS2
                 fecha_temporal = P_fecha_ayer.ToString("dd/MM/yyyy");
             }
 
-            string url_get;
             //url para obtener registros de la tuberia del dia anterior(ayer).
-            if (soldadura == "in")
-            {
-                if (maquina_poleo == "INTERNA1")
-                {
-                    url_get = P_url_interna1 + "?T_Fecha=" + fecha_temporal;
-
-                }
-                else if (maquina_poleo == "INTERNA2")
-                {
-                    url_get = P_url_interna2 + "?T_Fecha=" + fecha_temporal;
-                }
-                else
-                {
-                    url_get = P_url_interna3 + "?T_Fecha=" + fecha_temporal;
-                }
-
-            }
-            else
-            {
-                if (maquina_poleo == "EXTERNA1")
-                {
-                    url_get = P_url_externa1 + "?T_Fecha=" + fecha_temporal;
-                }
-                else if (maquina_poleo == "EXTERNA2")
-                {
-                    url_get = P_url_externa2 + "?T_Fecha=" + fecha_temporal;
-                }
-                else
-                {
-                    url_get = P_url_externa3 + "?T_Fecha=" + fecha_temporal;
-                }
-
-            }
+            string url_get = Selecion_url(maquina_poleo) + "?T_Fecha=" + fecha_temporal;
 
             try
             {
 
-                string output = GetApiData(url_get);
+                string output = Consultas.Get_API(url_get);
 
                 if (output != "[] ")
                 {
@@ -597,6 +548,7 @@ namespace app_servicio_SADS2
                     }
                     else if (soldadura == "ex")
                     {
+                        P_no_hay_archivos_ayer = false;
                         List<Tuberia_externa_tabla> temporal_results = JsonConvert.DeserializeObject<List<Tuberia_externa_tabla>>(output);
                         foreach (var r in temporal_results)
                         {
@@ -610,7 +562,60 @@ namespace app_servicio_SADS2
                 {
                     P_no_hay_archivos_ayer = true;
                 }
+                //ordenar registros por hora 
+                P_Tuberia_datatable = Ordenar_registros_ampm(P_Tuberia_datatable);
+                /*
+                //Checar si hay datos en la tabla
+                if (P_tuberia_datatable_ayer.Rows.Count > 0)
+                {
+                    //empezar ordenar tabla por hora con am y pm
+                    bool hay_archivos_am = false;
+                    P_tuberia_dataview = P_tuberia_datatable_ayer.DefaultView;
+                    //se oredena en forma ascedente la lista tomando en cuenta la columna
+                    //de la base de datos (formato de la maria db)
+                    P_tuberia_dataview.Sort = "T_hora_db ASC";
+                    P_tuberia_datatable_ayer = P_tuberia_dataview.ToTable();
+                    tuberia_filtro_am = P_tuberia_datatable_ayer;
+                    tuberia_filtro_pm = P_tuberia_datatable_ayer;
 
+                    P_tuberia_dataview = tuberia_filtro_am.DefaultView;
+                    P_tuberia_dataview.RowFilter = "T_hora LIKE '%am%'";
+                    //si hay un 12 am, mover al principio
+                    if (P_tuberia_dataview.Count > 0)
+                    {
+                        tuberia_filtro_am = Reacomodar_12(P_tuberia_dataview.ToTable());
+                        tabla_temporal = tuberia_filtro_am;
+                        hay_archivos_am = true;
+                    }
+
+
+                    P_tuberia_dataview = tuberia_filtro_pm.DefaultView;
+                    P_tuberia_dataview.RowFilter = "T_hora LIKE '%pm%'";
+                    //si hay un 12 pm, mover al principio
+                    if (P_tuberia_dataview.Count > 0)
+                    {
+                        tuberia_filtro_pm = Reacomodar_12(P_tuberia_dataview.ToTable());
+                        if (hay_archivos_am == true)
+                        {
+                            foreach (DataRow fila_temp in tuberia_filtro_pm.Rows)
+                            {
+                                tabla_temporal.Rows.Add(fila_temp.ItemArray);
+                            }
+                        }
+                        else
+                        {
+                            tabla_temporal = tuberia_filtro_pm;
+                        }
+                    }
+                }
+                else
+                {
+                    tabla_temporal = P_tuberia_datatable_ayer;
+                }
+
+
+                P_tuberia_datatable_ayer = tabla_temporal;
+                */
                 dgvTablaExcel.DataSource = P_tuberia_datatable_ayer;
             }
             catch (Exception err)
@@ -670,7 +675,7 @@ namespace app_servicio_SADS2
             //lblTemporal2.Text = path_temporal;
             //dgvDatosTabla.Rows.Clear();
             //CARGO EL DATAGRID CON LOS DATOS DE TUBERIA DE LA MAQUINA Y FECHA SELECCIONADA
-            dgvDatosTabla.DataSource = P_Tuberia_datatable;
+            
             
             if (dgvDatosTabla.Rows.Count != 0)
             {
@@ -793,38 +798,8 @@ namespace app_servicio_SADS2
         void Leer_archivos_excel(string carpeta, string soldadura, string maquina)
         {
             string temporal_string, hora_inicial, hora_final, tubo_hora;
-            if (soldadura == "in" || soldadura == "INTERNA")
-            {
-                if (maquina == "INTERNA1")
-                {
-                    P_url_update = P_url_interna1;
-                }
-                else if (maquina == "INTERNA2")
-                {
-                    P_url_update = P_url_interna2;
-                }
-                else
-                {
-                    P_url_update = P_url_interna3;
-                }
+            P_url_update = Selecion_url(maquina);
 
-            }
-            else
-            {
-                if (maquina == "EXTERNA1")
-                {
-                    P_url_update = P_url_externa1;
-                }
-                else if (maquina == "EXTERNA2")
-                {
-                    P_url_update = P_url_externa2;
-                }
-                else
-                {
-                    P_url_update = P_url_externa3;
-                }
-
-            }
 
             for (int i = 0; i < dgvDatosTabla.Rows.Count; i++)
             {
@@ -934,22 +909,13 @@ namespace app_servicio_SADS2
             lblTemporal.Text = s_temporal_string;
             if (P_manual == true)
             {
-                /*
-                if (P_registro_nuevo_archivo == true)
-                {
-                    InsertApiData(P_url_insert, s_temporal_string);
-                }
-                else
-                {
-                    UpdateApiData(P_url_update, s_temporal_string);
-                }
-                */
-                UpdateApiData(P_url_update, s_temporal_string);
+               
+                Actualizar_Archivos_excel(P_url_update, s_temporal_string);
 
             }
             else
             {
-                UpdateApiData(P_url_update, s_temporal_string);
+                Actualizar_Archivos_excel(P_url_update, s_temporal_string);
             }
             string tubo_ID = "T_id_tubo=" + "'" + dgvDatosTabla.Rows[0].Cells[0].Value + "'";
             Limpiar_tabla_fecha(exin, mq);
@@ -1184,38 +1150,10 @@ namespace app_servicio_SADS2
                 dgvDatosTabla.DataSource = tablaview_temporal.ToTable();
                 P_ID_tubo = dgvDatosTabla.Rows[0].Cells[0].Value.ToString();
                 lblTemporal.Text = P_ID_tubo;
-                if (cmbManualSoldadura.Text == "INTERNA")
-                {
-                    if (cmbManualMaquina.Text == "INTERNA1")
-                    {
-                        P_url_update = P_url_interna1;
-                    }
-                    else if (cmbManualMaquina.Text == "INTERNA2")
-                    {
-                        P_url_update =P_url_interna2;
-                    }
-                    else
-                    {
-                        P_url_update = P_url_interna3;
-                    }
-                    
-                }
-                else
-                {
-                    if (cmbManualMaquina.Text == "EXTERNA1")
-                    {
-                        P_url_update = P_url_externa1;
-                    }
-                    else if (cmbManualMaquina.Text == "EXTERNA2")
-                    {
-                        P_url_update = P_url_externa2;
-                    }
-                    else
-                    {
-                        P_url_update = P_url_externa3;
-                    }
-                    
-                }
+
+                //designar url dependiendo maquina seleccionada
+                P_url_update = Selecion_url(cmbManualMaquina.Text);
+
                 guardar_archivos_excel_tubo(hora_inicial, hora_final, manual_carpeta, cmbManualSoldadura.Text, cmbManualMaquina.Text);
             }
         }
