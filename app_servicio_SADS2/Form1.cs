@@ -38,7 +38,7 @@ namespace app_servicio_SADS2
         string P_url_externa1 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_1.php";
         string P_url_externa2 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_2.php";
         string P_url_externa3 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_3.php";
-        string version_app="version 1.2.0.18";
+        string version_app="version 1.2.0.21";
         
         //funcion principal
         public frmPrincipal()
@@ -717,7 +717,7 @@ namespace app_servicio_SADS2
                         if (P_no_hay_archivos_ayer == false)
                         {
 
-                            hora_inicial = P_fecha_ayer.ToString("yyyy/MM/dd") + " " + dgvTablaExcel.Rows[dgvTablaExcel.Rows.Count - 1].Cells[8].Value.ToString();
+                            hora_inicial = P_fecha_ayer.ToString("yyyy/MM/dd") + " " + dgvTablaExcel.Rows[dgvTablaExcel.Rows.Count - 1].Cells[9].Value.ToString();
                         }
                         else
                         {
@@ -739,9 +739,9 @@ namespace app_servicio_SADS2
                     }
                     else
                     {
-                        hora_inicial = P_fecha_busqueda + " " + dgvDatosTabla.Rows[i - 1].Cells[8].Value.ToString();
-                        hora_final = P_fecha_busqueda + " " + dgvDatosTabla.Rows[i].Cells[8].Value.ToString();
-                        tubo_hora = "T_hora=" + "'" + dgvDatosTabla.Rows[i].Cells[8].Value.ToString() + "'";
+                        hora_inicial = P_fecha_busqueda + " " + dgvDatosTabla.Rows[i - 1].Cells[9].Value.ToString();
+                        hora_final = P_fecha_busqueda + " " + dgvDatosTabla.Rows[i].Cells[9].Value.ToString();
+                        tubo_hora = "T_hora=" + "'" + dgvDatosTabla.Rows[i].Cells[9].Value.ToString() + "'";
                         //lblTemporal.Text = tubo_hora;
                         tuberia_dataview = P_Tuberia_datatable.DefaultView;
                         tuberia_dataview.RowFilter = tubo_hora;
