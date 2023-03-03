@@ -81,12 +81,13 @@ namespace app_servicio_SADS2
             this.panel2 = new System.Windows.Forms.Panel();
             this.button1 = new System.Windows.Forms.Button();
             this.panel3 = new System.Windows.Forms.Panel();
+            this.lblVersion = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.PnlBarraTitulo = new System.Windows.Forms.Panel();
             this.PtbMinimizar = new System.Windows.Forms.PictureBox();
             this.PtbCerrar = new System.Windows.Forms.PictureBox();
             this.ptbIndicador1 = new System.Windows.Forms.PictureBox();
-            this.lblVersion = new System.Windows.Forms.Label();
+            this.ckbDA = new System.Windows.Forms.CheckBox();
             this.gpbModo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.ptbIndicadorA)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ptbIndicador2)).BeginInit();
@@ -285,6 +286,7 @@ namespace app_servicio_SADS2
             // gpbModoManual
             // 
             this.gpbModoManual.BackColor = System.Drawing.Color.Transparent;
+            this.gpbModoManual.Controls.Add(this.ckbDA);
             this.gpbModoManual.Controls.Add(this.ckbREnombre);
             this.gpbModoManual.Controls.Add(this.btnReportesDia);
             this.gpbModoManual.Controls.Add(this.ckbExcel);
@@ -306,7 +308,7 @@ namespace app_servicio_SADS2
             this.gpbModoManual.Font = new System.Drawing.Font("Nirmala UI", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.gpbModoManual.Location = new System.Drawing.Point(4, 257);
             this.gpbModoManual.Name = "gpbModoManual";
-            this.gpbModoManual.Size = new System.Drawing.Size(345, 191);
+            this.gpbModoManual.Size = new System.Drawing.Size(350, 191);
             this.gpbModoManual.TabIndex = 7;
             this.gpbModoManual.TabStop = false;
             // 
@@ -408,7 +410,7 @@ namespace app_servicio_SADS2
             // rdbHorafinal
             // 
             this.rdbHorafinal.AutoSize = true;
-            this.rdbHorafinal.Location = new System.Drawing.Point(301, 84);
+            this.rdbHorafinal.Location = new System.Drawing.Point(290, 80);
             this.rdbHorafinal.Name = "rdbHorafinal";
             this.rdbHorafinal.Size = new System.Drawing.Size(14, 13);
             this.rdbHorafinal.TabIndex = 13;
@@ -418,7 +420,7 @@ namespace app_servicio_SADS2
             // 
             this.rdbHorainicial.AutoSize = true;
             this.rdbHorainicial.Checked = true;
-            this.rdbHorainicial.Location = new System.Drawing.Point(301, 44);
+            this.rdbHorainicial.Location = new System.Drawing.Point(290, 43);
             this.rdbHorainicial.Name = "rdbHorainicial";
             this.rdbHorainicial.Size = new System.Drawing.Size(14, 13);
             this.rdbHorainicial.TabIndex = 12;
@@ -659,6 +661,15 @@ namespace app_servicio_SADS2
             this.panel3.Size = new System.Drawing.Size(374, 479);
             this.panel3.TabIndex = 17;
             // 
+            // lblVersion
+            // 
+            this.lblVersion.AutoSize = true;
+            this.lblVersion.Location = new System.Drawing.Point(234, 69);
+            this.lblVersion.Name = "lblVersion";
+            this.lblVersion.Size = new System.Drawing.Size(41, 13);
+            this.lblVersion.TabIndex = 18;
+            this.lblVersion.Text = "version";
+            // 
             // pictureBox1
             // 
             this.pictureBox1.BackColor = System.Drawing.Color.Transparent;
@@ -716,14 +727,15 @@ namespace app_servicio_SADS2
             this.ptbIndicador1.TabIndex = 12;
             this.ptbIndicador1.TabStop = false;
             // 
-            // lblVersion
+            // ckbDA
             // 
-            this.lblVersion.AutoSize = true;
-            this.lblVersion.Location = new System.Drawing.Point(234, 69);
-            this.lblVersion.Name = "lblVersion";
-            this.lblVersion.Size = new System.Drawing.Size(41, 13);
-            this.lblVersion.TabIndex = 18;
-            this.lblVersion.Text = "version";
+            this.ckbDA.AutoSize = true;
+            this.ckbDA.Location = new System.Drawing.Point(310, 40);
+            this.ckbDA.Name = "ckbDA";
+            this.ckbDA.Size = new System.Drawing.Size(44, 21);
+            this.ckbDA.TabIndex = 18;
+            this.ckbDA.Text = "DA";
+            this.ckbDA.UseVisualStyleBackColor = true;
             // 
             // frmPrincipal
             // 
@@ -826,6 +838,7 @@ namespace app_servicio_SADS2
         private System.Windows.Forms.PictureBox PtbCerrar;
         private System.Windows.Forms.CheckBox ckbREnombre;
         private System.Windows.Forms.Label lblVersion;
+        private System.Windows.Forms.CheckBox ckbDA;
     }
 }
 

@@ -9,6 +9,8 @@ namespace app_servicio_SADS2
 {
     class Tuberia_externa_tabla
     {
+        [JsonProperty("T_ID_Rtubo")]
+        public int T_ID_Rtubo { get; set; }
         [JsonProperty("T_ID_tubo")]
         public string T_ID_tubo { get; set; }
         [JsonProperty("T_No_tubo")]

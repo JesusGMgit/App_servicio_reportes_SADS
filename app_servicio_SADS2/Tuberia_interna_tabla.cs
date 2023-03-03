@@ -9,7 +9,7 @@ namespace app_servicio_SADS2
 {
     class Tuberia_interna_tabla
     {
-       
+        public UInt32 T_ID_Rtubo { get; set; }
         public string T_ID_tubo { get; set; }
        
         public string T_No_tubo { get; set; }

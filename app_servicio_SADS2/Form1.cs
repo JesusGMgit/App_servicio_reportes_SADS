@@ -25,13 +25,12 @@ namespace app_servicio_SADS2
         //DateTime P_hora_registro_anterior, P_temporal_datetime;
         DateTime P_hora_now, P_fecha_ayer;
         DataTable P_Tuberia_datatable = new DataTable();
-        DataTable P_tuberia_datatable_ayer = new DataTable();
+        DataTable P_Tuberia_datatable_ayer = new DataTable();
         DataTable P_proyecto_datatable = new DataTable();
         DataTable P_Tabla_excel = new DataTable();
         DataTable P_operador_datatable = new DataTable();
-        DataView P_tuberia_dataview;
-        bool P_manual, P_registro_nuevo_archivo, P_auto_un_registro, P_no_hay_archivos_ayer=true;
-        string P_fecha_busqueda, P_url_get, P_url_update, P_url_insert, P_ID_tubo;
+        bool P_manual, P_auto_un_registro, P_no_hay_archivos_ayer=true;
+        string P_fecha_busqueda, P_url_get, P_url_update, P_ID_tubo;
         //varaibles url
         string P_url_interna1 = "http://10.10.20.15/backend/api/ar_tTuberiaInterna_1.php";
         string P_url_interna2 = "http://10.10.20.15/backend/api/ar_tTuberiaInterna_2.php";
@@ -39,7 +38,7 @@ namespace app_servicio_SADS2
         string P_url_externa1 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_1.php";
         string P_url_externa2 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_2.php";
         string P_url_externa3 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_3.php";
-        string version_app="version 1.2.0.11";
+        string version_app="version 1.2.0.18";
         
         //funcion principal
         public frmPrincipal()
@@ -84,7 +83,7 @@ namespace app_servicio_SADS2
             cmbManualMaquina.Items.Clear();
             cmbManualSoldadura.Items.Clear();
             btnIniciarAuto.Enabled = true;
-            btnPararAuto.Enabled = true;
+            btnPararAuto.Enabled = false;
             txbManualHoraFinal.Enabled = false;
             txbManualHoraInicial.Enabled = false;
             btnGuardarExcel.Enabled = false;
@@ -92,6 +91,7 @@ namespace app_servicio_SADS2
             ptbIndicador2.Image = iglImagenes.Images[5];
             btnModoManual.Text = "ABRIR";
             ptbIndicador1.Image = iglImagenes.Images[17];
+            lblVersion.Text = version_app;
         }
         void Iniciar_datagrid()
         {
@@ -102,6 +102,7 @@ namespace app_servicio_SADS2
 
         void Iniciar_tabla_tuberia()
         {
+            P_Tuberia_datatable.Columns.Add("T_id_Rtubo");
             P_Tuberia_datatable.Columns.Add("T_id_tubo");
             P_Tuberia_datatable.Columns.Add("T_no_tubo");
             P_Tuberia_datatable.Columns.Add("T_no_placa");
@@ -115,18 +116,19 @@ namespace app_servicio_SADS2
             P_Tuberia_datatable.Columns.Add("archivo_excel");
             P_Tuberia_datatable.Columns.Add("Observaciones");
 
-            P_tuberia_datatable_ayer.Columns.Add("T_id_tubo");
-            P_tuberia_datatable_ayer.Columns.Add("T_no_tubo");
-            P_tuberia_datatable_ayer.Columns.Add("T_no_placa");
-            P_tuberia_datatable_ayer.Columns.Add("T_ID_proyecto");
-            P_tuberia_datatable_ayer.Columns.Add("T_lote_alambre");
-            P_tuberia_datatable_ayer.Columns.Add("T_lote_fundente");
-            P_tuberia_datatable_ayer.Columns.Add("T_foliooperador");
-            P_tuberia_datatable_ayer.Columns.Add("T_fecha");
-            P_tuberia_datatable_ayer.Columns.Add("T_hora");
-            P_tuberia_datatable_ayer.Columns.Add("T_hora_db");
-            P_tuberia_datatable_ayer.Columns.Add("archivo_excel");
-            P_tuberia_datatable_ayer.Columns.Add("Observaciones");
+            P_Tuberia_datatable_ayer.Columns.Add("T_id_Rtubo");
+            P_Tuberia_datatable_ayer.Columns.Add("T_id_tubo");
+            P_Tuberia_datatable_ayer.Columns.Add("T_no_tubo");
+            P_Tuberia_datatable_ayer.Columns.Add("T_no_placa");
+            P_Tuberia_datatable_ayer.Columns.Add("T_ID_proyecto");
+            P_Tuberia_datatable_ayer.Columns.Add("T_lote_alambre");
+            P_Tuberia_datatable_ayer.Columns.Add("T_lote_fundente");
+            P_Tuberia_datatable_ayer.Columns.Add("T_foliooperador");
+            P_Tuberia_datatable_ayer.Columns.Add("T_fecha");
+            P_Tuberia_datatable_ayer.Columns.Add("T_hora");
+            P_Tuberia_datatable_ayer.Columns.Add("T_hora_db");
+            P_Tuberia_datatable_ayer.Columns.Add("archivo_excel");
+            P_Tuberia_datatable_ayer.Columns.Add("Observaciones");
 
         }
         void iniciar_tabla_excel()
@@ -184,23 +186,6 @@ namespace app_servicio_SADS2
 
 
         #region funciones para envio o peticion de datos por medio de las apis
-        public string GetApiData(string url)
-        {
-            //obtiene los registros de la base de datos segun sea la dirrecion o a la API que hace referencia
-            string responseString = "";
-            try
-            {
-                var response = cliente.GetStringAsync(url);
-                responseString = response.Result;
-
-            }
-            catch (Exception err)
-            {
-                MessageBox.Show("getapi_error: " + err.Message);
-
-            }
-            return responseString;
-        }
 
         public string Selecion_url(string maquina)
         {
@@ -234,12 +219,13 @@ namespace app_servicio_SADS2
         }
         public void Actualizar_Archivos_excel(string url, string archivos_excel)
         {
+            string id_Rtubo = dgvDatosTabla.Rows[0].Cells[0].Value.ToString();
 
             try
             {
                 Dictionary<string, string> diccionario_archivos_excel = new Dictionary<string, string>
                 {
-                    {"T_ID_tubo", P_ID_tubo },
+                    {"T_ID_Rtubo", id_Rtubo },
                     {"T_Archivos_excel", archivos_excel},
                 };
 
@@ -258,11 +244,11 @@ namespace app_servicio_SADS2
         //funcion para guaradar nombres de los archivos excel
         void Actualizar_Reporte_excel(string nombre_reporte, string maquina_reporte)
         {
-            string id_tubo = dgvDatosTabla.Rows[0].Cells[0].Value.ToString();
+            string id_Rtubo = dgvDatosTabla.Rows[0].Cells[0].Value.ToString();
 
             Dictionary<string, string> diccionario_update_reporte = new Dictionary<string, string>
                 {
-                    {"T_ID_tubo", id_tubo },
+                    {"T_ID_Rtubo", id_Rtubo },
                     {"T_Reporte_excel", nombre_reporte+".xlsx"},
                 };
 
@@ -281,39 +267,45 @@ namespace app_servicio_SADS2
 
         DataTable Ordenar_registros_ampm(DataTable tabla_registros_a_ordenar)
         {
-            DataTable tuberia_filtro_am = new DataTable();
-            DataTable tuberia_filtro_pm = new DataTable();
+            DataTable tuberia_filtro_am = tabla_registros_a_ordenar;
+            DataTable tuberia_filtro_pm = tabla_registros_a_ordenar;
             DataTable tabla_temporal = new DataTable();
+            DataView  tuberia_dataview;
             //Checar si hay datos en la tabla
             if (tabla_registros_a_ordenar.Rows.Count > 0)
             {
                 //empezar ordenar tabla por hora con am y pm
                 bool hay_archivos_am = false;
-                P_tuberia_dataview = tabla_registros_a_ordenar.DefaultView;
+                tuberia_dataview = tabla_registros_a_ordenar.DefaultView;
                 //se oredena en forma ascedente la lista tomando en cuenta la columna
                 //de la base de datos (formato de la maria db)
-                P_tuberia_dataview.Sort = "T_hora_db ASC";
-                tabla_registros_a_ordenar = P_tuberia_dataview.ToTable();
-                tuberia_filtro_am = tabla_registros_a_ordenar;
-                tuberia_filtro_pm = tabla_registros_a_ordenar;
+                tuberia_dataview.Sort = "T_hora_db ASC";
+                tabla_registros_a_ordenar = tuberia_dataview.ToTable();
+                
 
-                P_tuberia_dataview = tuberia_filtro_am.DefaultView;
-                P_tuberia_dataview.RowFilter = "T_hora LIKE '%am%'";
+                tuberia_dataview = tuberia_filtro_am.DefaultView;
+                //aplico un filtro para dejar solo los registros que tienen en su hora am
+                tuberia_dataview.RowFilter = "T_hora LIKE '%am%'";
                 //si hay un 12 am, mover al principio
-                if (P_tuberia_dataview.Count > 0)
+                if (tuberia_dataview.Count > 0)
                 {
-                    tuberia_filtro_am = Reacomodar_12(P_tuberia_dataview.ToTable());
+                    //funcion para ordenar los registros dejando el 12:$$ xm en primer lugar
+                    tuberia_filtro_am = Reacomodar_12(tuberia_dataview.ToTable());
                     tabla_temporal = tuberia_filtro_am;
                     hay_archivos_am = true;
                 }
 
 
-                P_tuberia_dataview = tuberia_filtro_pm.DefaultView;
-                P_tuberia_dataview.RowFilter = "T_hora LIKE '%pm%'";
+                tuberia_dataview = tuberia_filtro_pm.DefaultView;
+                //aplico un filtro para dejar solo los registros que tienen en su hora pm
+                tuberia_dataview.RowFilter = "T_hora LIKE '%pm%'";
                 //si hay un 12 pm, mover al principio
-                if (P_tuberia_dataview.Count > 0)
+                if (tuberia_dataview.Count > 0)
                 {
-                    tuberia_filtro_pm = Reacomodar_12(P_tuberia_dataview.ToTable());
+                    //funcion para ordenar los registros dejando el 12:$$ xm en primer lugar
+                    tuberia_filtro_pm = Reacomodar_12(tuberia_dataview.ToTable());
+                    //si hay registros con am en su columna hora, se agregan los registros de 
+                    //tabla tuberia_filtro_pm despues de estos
                     if (hay_archivos_am == true)
                     {
                         foreach (DataRow fila_temp in tuberia_filtro_pm.Rows)
@@ -335,35 +327,43 @@ namespace app_servicio_SADS2
         }
         DataTable Reacomodar_12(DataTable tabla_reacomodar)
         {
-
+            //tomo la vista de la tabla  para hacer los filtros necesarios
             DataView temporal_dataview_12 = tabla_reacomodar.DefaultView;
+            
+            //aplico un filtro para sacar solo el que tenga 12: en la hora
             temporal_dataview_12.RowFilter = "T_hora LIKE '12:*'";
-            int num_filas = tabla_reacomodar.Rows.Count;
+            //se reacomoda los registros que en su columna hora tengan 12:
+            DataTable tabla_temporal_reacomodar = tabla_reacomodar;
+            int num_filas = tabla_temporal_reacomodar.Rows.Count;
             int num_12 = temporal_dataview_12.Count;
+            
+            //si existen rregitros en la dataview con el filtro se reaocmoda
             if (num_12 > 0)
             {
                 for (int j = 1; j <= num_12; j++)
                 {
-                    object[] row_12 = tabla_reacomodar.Rows[num_filas - 1].ItemArray;
+                    object[] row_12 = tabla_temporal_reacomodar.Rows[num_filas - 1].ItemArray;
                     for (int i = num_filas - 2; i > 0; i--)
                     {
-                        object[] row_inter1 = tabla_reacomodar.Rows[i].ItemArray;
-                        object[] row_inter2 = tabla_reacomodar.Rows[i - 1].ItemArray;
-                        tabla_reacomodar.Rows[i + 1].ItemArray = row_inter1;
-                        tabla_reacomodar.Rows[i].ItemArray = row_inter2;
+                        object[] row_inter1 = tabla_temporal_reacomodar.Rows[i].ItemArray;
+                        object[] row_inter2 = tabla_temporal_reacomodar.Rows[i - 1].ItemArray;
+                        tabla_temporal_reacomodar.Rows[i + 1].ItemArray = row_inter1;
+                        tabla_temporal_reacomodar.Rows[i].ItemArray = row_inter2;
                     }
-                    tabla_reacomodar.Rows[0].ItemArray = row_12;
+                    tabla_temporal_reacomodar.Rows[0].ItemArray = row_12;
                 }
 
             }
+            //Port alguna razon si no pongo eta instruccion la tabla me deja solo el filtro de 12:
             temporal_dataview_12.RowFilter = "T_hora LIKE '%:%'";
-            return tabla_reacomodar;
+            return tabla_temporal_reacomodar;
         }
         public void Rellenar_tabla_datos(string soldadura)
         {
             //llena la tabla de datos para tuberia de los registros solicitados por fecha dada
             
             P_Tuberia_datatable.Rows.Clear();
+            DataTable tabla_temporal = P_Tuberia_datatable;
             Thread.Sleep(500);
             
             try
@@ -376,77 +376,26 @@ namespace app_servicio_SADS2
                     List<Tuberia_interna_tabla> temporal_results = JsonConvert.DeserializeObject<List<Tuberia_interna_tabla>>(output);
                     foreach (var r in temporal_results)
                     {
-                        
-                        P_Tuberia_datatable.Rows.Add(r.T_ID_tubo, r.T_No_tubo, r.T_No_placa, r.T_ID_proyecto, r.T_Lote_alambre,
+
+                        tabla_temporal.Rows.Add(r.T_ID_Rtubo, r.T_ID_tubo, r.T_No_tubo, r.T_No_placa, r.T_ID_proyecto, r.T_Lote_alambre,
                             r.T_Lote_fundente,r.T_Foliooperador, r.T_Fecha, r.T_Hora, r.T_Hora_db, r.T_Archivos_excel,r.T_Observaciones);
 
                     }
                 }
-                else if (soldadura == "EXTERNA" || soldadura== "ex")
+                else if ((output != "null") && (soldadura == "EXTERNA" || soldadura== "ex"))
                 {
                     List<Tuberia_externa_tabla> temporal_results = JsonConvert.DeserializeObject<List<Tuberia_externa_tabla>>(output);
                     foreach (var r in temporal_results)
                     {
-                        
-                        P_Tuberia_datatable.Rows.Add(r.T_ID_tubo, r.T_No_tubo, r.T_No_placa, r.T_ID_proyecto, r.T_Lote_alambre,
+
+                        tabla_temporal.Rows.Add(r.T_ID_Rtubo, r.T_ID_tubo, r.T_No_tubo, r.T_No_placa, r.T_ID_proyecto, r.T_Lote_alambre,
                             r.T_Lote_fundente,r.T_Foliooperador, r.T_Fecha, r.T_Hora, r.T_Hora_db, r.T_Archivos_excel,r.T_Observaciones);
 
                     }
                 }
 
                 //ordenar registros por hora 
-                P_Tuberia_datatable = Ordenar_registros_ampm(P_Tuberia_datatable);
-                /*
-                //Checar si hay datos en la tabla
-                if (P_Tuberia_datatable.Rows.Count>0)
-                {
-                    //empezar ordenar tabla por hora con am y pm
-                    bool hay_archivos_am = false;
-                    P_tuberia_dataview = P_Tuberia_datatable.DefaultView;
-                    //se oredena en forma ascedente la lista tomando en cuenta la columna
-                    //de la base de datos (formato de la maria db)
-                    P_tuberia_dataview.Sort = "T_hora_db ASC";
-                    P_Tuberia_datatable = P_tuberia_dataview.ToTable();
-                    tuberia_filtro_am = P_Tuberia_datatable;
-                    tuberia_filtro_pm = P_Tuberia_datatable;
-
-                    P_tuberia_dataview = tuberia_filtro_am.DefaultView;
-                    P_tuberia_dataview.RowFilter = "T_hora LIKE '%am%'";
-                    //si hay un 12 am, mover al principio
-                    if (P_tuberia_dataview.Count > 0)
-                    {
-                        tuberia_filtro_am = Reacomodar_12(P_tuberia_dataview.ToTable());
-                        tabla_temporal = tuberia_filtro_am;
-                        hay_archivos_am = true;
-                    }
-
-
-                    P_tuberia_dataview = tuberia_filtro_pm.DefaultView;
-                    P_tuberia_dataview.RowFilter = "T_hora LIKE '%pm%'";
-                    //si hay un 12 pm, mover al principio
-                    if (P_tuberia_dataview.Count > 0)
-                    {
-                        tuberia_filtro_pm = Reacomodar_12(P_tuberia_dataview.ToTable());
-                        if (hay_archivos_am == true)
-                        {
-                            foreach (DataRow fila_temp in tuberia_filtro_pm.Rows)
-                            {
-                                tabla_temporal.Rows.Add(fila_temp.ItemArray);
-                            }
-                        }
-                        else
-                        {
-                            tabla_temporal = tuberia_filtro_pm;
-                        }
-                    }
-                }
-                else
-                {
-                    tabla_temporal = P_Tuberia_datatable;
-                }
-                
-                P_Tuberia_datatable = tabla_temporal;
-                */
+                P_Tuberia_datatable = Ordenar_registros_ampm(tabla_temporal);
 
                 dgvDatosTabla.DataSource = P_Tuberia_datatable;
             }
@@ -473,7 +422,7 @@ namespace app_servicio_SADS2
 
         void Rellenar_tabla_operador(string folio_operador)
         {
-            string url_operador = "http://10.10.20.15/api/rq_tOperadores.php?id=" + folio_operador;
+            string url_operador = "http://10.10.20.15/backend/api/ar_tOperadores.php?Op_Folio=" + folio_operador;
             var resultado_operador = Consultas.Get_API(url_operador);
             
             List<Operadores_tabla> temporal_resultado = JsonConvert.DeserializeObject<List<Operadores_tabla>>(resultado_operador);
@@ -508,9 +457,7 @@ namespace app_servicio_SADS2
         void Llenar_tabla_datos_ayer(string soldadura, string maquina_poleo)
         {
             //limpiar tabla de datos de registros de dia anterior en el que se esta trabajando
-            P_tuberia_datatable_ayer.Clear();
-            DataTable tuberia_filtro_am = new DataTable();
-            DataTable tuberia_filtro_pm = new DataTable();
+            P_Tuberia_datatable_ayer.Clear();
             DataTable tabla_temporal = new DataTable();
             //fecha en formato de busqueda en tabla de soldaduras
             string fecha_temporal;
@@ -533,7 +480,7 @@ namespace app_servicio_SADS2
 
                 string output = Consultas.Get_API(url_get);
 
-                if (output != "[] ")
+                if (output != "null")
                 {
                     if (soldadura == "in")
                     {
@@ -541,7 +488,7 @@ namespace app_servicio_SADS2
                         List<Tuberia_interna_tabla> temporal_results = JsonConvert.DeserializeObject<List<Tuberia_interna_tabla>>(output);
                         foreach (var r in temporal_results)
                         {
-                            P_tuberia_datatable_ayer.Rows.Add(r.T_ID_tubo, r.T_No_tubo, r.T_No_placa, r.T_ID_proyecto, r.T_Lote_alambre,
+                            P_Tuberia_datatable_ayer.Rows.Add(r.T_ID_Rtubo, r.T_ID_tubo, r.T_No_tubo, r.T_No_placa, r.T_ID_proyecto, r.T_Lote_alambre,
                                 r.T_Lote_fundente, r.T_Foliooperador, r.T_Fecha, r.T_Hora, r.T_Hora_db, r.T_Archivos_excel, r.T_Observaciones);
 
                         }
@@ -552,7 +499,7 @@ namespace app_servicio_SADS2
                         List<Tuberia_externa_tabla> temporal_results = JsonConvert.DeserializeObject<List<Tuberia_externa_tabla>>(output);
                         foreach (var r in temporal_results)
                         {
-                            P_tuberia_datatable_ayer.Rows.Add(r.T_ID_tubo, r.T_No_tubo, r.T_No_placa, r.T_ID_proyecto, r.T_Lote_alambre,
+                            P_Tuberia_datatable_ayer.Rows.Add(r.T_ID_Rtubo, r.T_ID_tubo, r.T_No_tubo, r.T_No_placa, r.T_ID_proyecto, r.T_Lote_alambre,
                                 r.T_Lote_fundente, r.T_Foliooperador, r.T_Fecha, r.T_Hora, r.T_Hora_db, r.T_Archivos_excel, r.T_Observaciones);
 
                         }
@@ -563,60 +510,10 @@ namespace app_servicio_SADS2
                     P_no_hay_archivos_ayer = true;
                 }
                 //ordenar registros por hora 
-                P_Tuberia_datatable = Ordenar_registros_ampm(P_Tuberia_datatable);
-                /*
-                //Checar si hay datos en la tabla
-                if (P_tuberia_datatable_ayer.Rows.Count > 0)
-                {
-                    //empezar ordenar tabla por hora con am y pm
-                    bool hay_archivos_am = false;
-                    P_tuberia_dataview = P_tuberia_datatable_ayer.DefaultView;
-                    //se oredena en forma ascedente la lista tomando en cuenta la columna
-                    //de la base de datos (formato de la maria db)
-                    P_tuberia_dataview.Sort = "T_hora_db ASC";
-                    P_tuberia_datatable_ayer = P_tuberia_dataview.ToTable();
-                    tuberia_filtro_am = P_tuberia_datatable_ayer;
-                    tuberia_filtro_pm = P_tuberia_datatable_ayer;
-
-                    P_tuberia_dataview = tuberia_filtro_am.DefaultView;
-                    P_tuberia_dataview.RowFilter = "T_hora LIKE '%am%'";
-                    //si hay un 12 am, mover al principio
-                    if (P_tuberia_dataview.Count > 0)
-                    {
-                        tuberia_filtro_am = Reacomodar_12(P_tuberia_dataview.ToTable());
-                        tabla_temporal = tuberia_filtro_am;
-                        hay_archivos_am = true;
-                    }
-
-
-                    P_tuberia_dataview = tuberia_filtro_pm.DefaultView;
-                    P_tuberia_dataview.RowFilter = "T_hora LIKE '%pm%'";
-                    //si hay un 12 pm, mover al principio
-                    if (P_tuberia_dataview.Count > 0)
-                    {
-                        tuberia_filtro_pm = Reacomodar_12(P_tuberia_dataview.ToTable());
-                        if (hay_archivos_am == true)
-                        {
-                            foreach (DataRow fila_temp in tuberia_filtro_pm.Rows)
-                            {
-                                tabla_temporal.Rows.Add(fila_temp.ItemArray);
-                            }
-                        }
-                        else
-                        {
-                            tabla_temporal = tuberia_filtro_pm;
-                        }
-                    }
-                }
-                else
-                {
-                    tabla_temporal = P_tuberia_datatable_ayer;
-                }
-
-
-                P_tuberia_datatable_ayer = tabla_temporal;
-                */
-                dgvTablaExcel.DataSource = P_tuberia_datatable_ayer;
+                tabla_temporal = P_Tuberia_datatable_ayer;
+                P_Tuberia_datatable_ayer = Ordenar_registros_ampm(tabla_temporal);
+              
+                dgvTablaExcel.DataSource = P_Tuberia_datatable_ayer;
             }
             catch (Exception err)
             {
@@ -798,12 +695,13 @@ namespace app_servicio_SADS2
         void Leer_archivos_excel(string carpeta, string soldadura, string maquina)
         {
             string temporal_string, hora_inicial, hora_final, tubo_hora;
+            DataView tuberia_dataview;
             P_url_update = Selecion_url(maquina);
 
 
             for (int i = 0; i < dgvDatosTabla.Rows.Count; i++)
             {
-                temporal_string = dgvDatosTabla.Rows[i].Cells[10].Value.ToString();
+                temporal_string = dgvDatosTabla.Rows[i].Cells[11].Value.ToString();
                 if (ckbREnombre.Checked)
                 {
                     temporal_string = "";
@@ -826,13 +724,13 @@ namespace app_servicio_SADS2
                             hora_inicial = P_fecha_busqueda + " 12:01:00 am";
 
                         }
-                        hora_final = P_fecha_busqueda + " " + dgvDatosTabla.Rows[i].Cells[8].Value.ToString();
-                        hora_filtro = dgvDatosTabla.Rows[i].Cells[8].Value.ToString();
+                        hora_final = P_fecha_busqueda + " " + dgvDatosTabla.Rows[i].Cells[9].Value.ToString();
+                        hora_filtro = dgvDatosTabla.Rows[i].Cells[9].Value.ToString();
                         tubo_hora = "T_hora=" + "'" + hora_filtro + "'";
                         //lblTemporal.Text = tubo_hora;
-                        P_tuberia_dataview = P_Tuberia_datatable.DefaultView;
-                        P_tuberia_dataview.RowFilter = tubo_hora;
-                        dgvDatosTabla.DataSource = P_tuberia_dataview.ToTable();
+                        tuberia_dataview = P_Tuberia_datatable.DefaultView;
+                        tuberia_dataview.RowFilter = tubo_hora;
+                        dgvDatosTabla.DataSource = tuberia_dataview.ToTable();
                         P_ID_tubo = dgvDatosTabla.Rows[0].Cells[0].Value.ToString();
                         //lblTemporal.Text = P_ID_tubo;
                       
@@ -845,9 +743,9 @@ namespace app_servicio_SADS2
                         hora_final = P_fecha_busqueda + " " + dgvDatosTabla.Rows[i].Cells[8].Value.ToString();
                         tubo_hora = "T_hora=" + "'" + dgvDatosTabla.Rows[i].Cells[8].Value.ToString() + "'";
                         //lblTemporal.Text = tubo_hora;
-                        P_tuberia_dataview = P_Tuberia_datatable.DefaultView;
-                        P_tuberia_dataview.RowFilter = tubo_hora;
-                        dgvDatosTabla.DataSource = P_tuberia_dataview.ToTable();
+                        tuberia_dataview = P_Tuberia_datatable.DefaultView;
+                        tuberia_dataview.RowFilter = tubo_hora;
+                        dgvDatosTabla.DataSource = tuberia_dataview.ToTable();
                         P_ID_tubo = dgvDatosTabla.Rows[0].Cells[0].Value.ToString();
                         //lblTemporal.Text = P_ID_tubo;
                         
@@ -867,6 +765,7 @@ namespace app_servicio_SADS2
         {
             DateTime horainicial_datetime = Convert.ToDateTime(hi);
             DateTime horafinal_datetime = Convert.ToDateTime(hf);
+            DataView tuberia_dataview;
             //string hora_filtro = horafinal_datetime.ToString("hh:mm:ss tt");
             string nombre_archivo, s_temporal_string = "";
             int j = 0;
@@ -917,11 +816,11 @@ namespace app_servicio_SADS2
             {
                 Actualizar_Archivos_excel(P_url_update, s_temporal_string);
             }
-            string tubo_ID = "T_id_tubo=" + "'" + dgvDatosTabla.Rows[0].Cells[0].Value + "'";
+            string tubo_ID = "T_id_Rtubo=" + "'" + dgvDatosTabla.Rows[0].Cells[0].Value + "'";
             Limpiar_tabla_fecha(exin, mq);
-            P_tuberia_dataview = P_Tuberia_datatable.DefaultView;
-            P_tuberia_dataview.RowFilter = tubo_ID;
-            dgvDatosTabla.DataSource = P_tuberia_dataview.ToTable();
+            tuberia_dataview = P_Tuberia_datatable.DefaultView;
+            tuberia_dataview.RowFilter = tubo_ID;
+            dgvDatosTabla.DataSource = tuberia_dataview.ToTable();
 
 
             //return horafinal_datetime;
@@ -1060,10 +959,7 @@ namespace app_servicio_SADS2
         
         private void frmPrincipal_Load(object sender, EventArgs e)
         {
-            lblVersion.Text = version_app;
-            ptbIndicador1.Image = iglImagenes.Images[17];
-            ptbIndicador2.Image = iglImagenes.Images[5];
-            btnPararAuto.Enabled = false;
+            
             Iniciar_tabla_tuberia();
             Iniciar_tabla_operador();
             Iniciar_tabla_proyecto();
@@ -1108,16 +1004,6 @@ namespace app_servicio_SADS2
             string manual_carpeta = "MONITOREO_" + cmbManualMaquina.Text;
             
             path_temporal = pathP + "MONITOREO_" + cmbManualMaquina.Text + "\\";
-            /*      
-            if (dgvDatosTabla.Rows.Count == 0)
-            {
-                P_registro_nuevo_archivo = true;
-            }
-            else
-            {
-                P_registro_nuevo_archivo = false;
-            }
-            */
             //limpiar la lista de no,bres de archivos excel
             ltbArchivosExcel.Items.Clear();
             //buscar archivos excel en la fecha dada
@@ -1138,10 +1024,17 @@ namespace app_servicio_SADS2
             DataView tablaview_temporal;
             //asignar a variables la hora inicial y final de busqueda de archivos excel
             string manual_carpeta = "MONITOREO_" + cmbManualMaquina.Text;
+            DateTime hora_antes_ayer;
             if ((txbManualHoraInicial.Text != "") && (txbManualHoraFinal.Text != ""))
             {
                 hora_inicial = P_fecha_busqueda + " " + txbManualHoraInicial.Text;
                 hora_final = P_fecha_busqueda + " " + txbManualHoraFinal.Text;
+                if (ckbDA.Checked==true)
+                {
+                    hora_antes_ayer = Convert.ToDateTime(hora_inicial).AddDays(-1);
+                    hora_inicial = hora_antes_ayer.ToString("yyyy/MM/dd hh:mm:ss tt");
+                }
+                
                 string tubo_hora = "T_hora=" + "'" + txbManualHoraFinal.Text + "'";
                 lblTemporal.Text = tubo_hora;
                 tablaview_temporal = P_Tuberia_datatable.DefaultView;
@@ -1190,7 +1083,7 @@ namespace app_servicio_SADS2
             //string exin_excel=dgvDatosTabla.Rows[0].Cells[6].Value.ToString().Substring(0,2);
             string maquina_reporte = P_maquina_reporte;
             ltbTemporal.Items.Clear();
-            string S01 = dgvDatosTabla.Rows[0].Cells[10].Value.ToString();
+            string S01 = dgvDatosTabla.Rows[0].Cells[11].Value.ToString();
             lblTemporal.Text = S01;
             char[] delimit = new char[] { ',' };
             int i01 = S01.IndexOf(","), j = 0;
@@ -1246,9 +1139,9 @@ namespace app_servicio_SADS2
             //empieza creacion de reporte 
             //solicitar datos del proyecto
             P_proyecto_datatable.Clear();
-            Rellenar_tabla_proyectos(dgvDatosTabla.Rows[0].Cells[3].Value.ToString());
+            Rellenar_tabla_proyectos(dgvDatosTabla.Rows[0].Cells[4].Value.ToString());
             P_operador_datatable.Clear();
-            Rellenar_tabla_operador(dgvDatosTabla.Rows[0].Cells[6].Value.ToString());
+            Rellenar_tabla_operador(dgvDatosTabla.Rows[0].Cells[7].Value.ToString());
             //dar formato a tabla
             //encabezado
             /*string directorio_resource = Directory.GetCurrentDirectory();
@@ -1274,10 +1167,10 @@ namespace app_servicio_SADS2
             rangoceldas = rt_sheet.Range["A5:P24"];
             rangoceldas.Font.Size = 16;
             rt_sheet.Range["O5"].Value = "FECHA:";
-            rt_sheet.Range["P5"].Value = dgvDatosTabla.Rows[0].Cells[7].Value.ToString();
+            rt_sheet.Range["P5"].Value = dgvDatosTabla.Rows[0].Cells[8].Value.ToString();
             rt_sheet.Range["P5"].Font.Bold = true;
             rt_sheet.Range["O6"].Value = "HORA:";
-            rt_sheet.Range["P6"].Value = dgvDatosTabla.Rows[0].Cells[8].Value.ToString();
+            rt_sheet.Range["P6"].Value = dgvDatosTabla.Rows[0].Cells[9].Value.ToString();
             rt_sheet.Range["P6"].Font.Bold = true;
             //datos del proyecto
             rt_sheet.Range["A5"].Value = "DATOS DEL PROYECTO";
@@ -1293,11 +1186,11 @@ namespace app_servicio_SADS2
             //datos del tubo
             rt_sheet.Range["G5"].Value = "DATOS DEL TUBO";
             rt_sheet.Range["G6"].Value = "No. TUBO:";
-            string tubo_nr = dgvDatosTabla.Rows[0].Cells[1].Value.ToString();
+            string tubo_nr = dgvDatosTabla.Rows[0].Cells[2].Value.ToString();
             rt_sheet.Range["I6"].Value = tubo_nr;
             rt_sheet.Range["I6"].Font.Bold = true;
             rt_sheet.Range["G7"].Value = "No. PLACA:";
-            string placa_nr= dgvDatosTabla.Rows[0].Cells[2].Value.ToString();
+            string placa_nr= dgvDatosTabla.Rows[0].Cells[3].Value.ToString();
             rt_sheet.Range["I7"].Value = placa_nr;
             rt_sheet.Range["I7"].Font.Bold = true;
             rt_sheet.Range["J6"].Value = "DIAMETRO:";
@@ -1312,13 +1205,13 @@ namespace app_servicio_SADS2
             rt_sheet.Range["C10"].Value = P_proyecto_datatable.Rows[0]["Alambre"].ToString();
             rt_sheet.Range["C10"].Font.Bold = true;
             rt_sheet.Range["E10"].Value = "LOTE:";
-            rt_sheet.Range["F10"].Value = dgvDatosTabla.Rows[0].Cells[4].Value.ToString();
+            rt_sheet.Range["F10"].Value = dgvDatosTabla.Rows[0].Cells[5].Value.ToString();
             rt_sheet.Range["F10"].Font.Bold = true;
             rt_sheet.Range["I10"].Value = "FUNDENTE:";
             rt_sheet.Range["K10"].Value = P_proyecto_datatable.Rows[0]["Fundente"].ToString();
             rt_sheet.Range["K10"].Font.Bold = true;
             rt_sheet.Range["M10"].Value = "LOTE:";
-            rt_sheet.Range["N10"].Value = dgvDatosTabla.Rows[0].Cells[5].Value.ToString();
+            rt_sheet.Range["N10"].Value = dgvDatosTabla.Rows[0].Cells[6].Value.ToString();
             rt_sheet.Range["N10"].Font.Bold = true;
 
             //datos del operador
@@ -1345,7 +1238,7 @@ namespace app_servicio_SADS2
             rt_sheet.Range["I15"].Value = "sin datos";
             rt_sheet.Range["I15"].Font.Bold = true;
             rt_sheet.Range["A16"].Value = "OBSERVACIONES";
-            rt_sheet.Range["C16"].Value = dgvDatosTabla.Rows[0].Cells[11].Value.ToString();
+            rt_sheet.Range["C16"].Value = dgvDatosTabla.Rows[0].Cells[12].Value.ToString();
             rt_sheet.Range["C16"].Font.Bold = true;
             //PROMEDIO DE PARAMETROS
             rt_sheet.Range["A18"].Value = "PROMEDIOS PARAMETROS MEDIDOS";
@@ -1384,7 +1277,7 @@ namespace app_servicio_SADS2
             rangoceldas.Merge();
             rangoceldas.Value = "VALORES REGISTRADOS DE PARAMETROS";
             rt_s_tablas.Range["J2"].Value = "FECHA:";
-            rt_s_tablas.Range["K2"].Value = dgvDatosTabla.Rows[0].Cells[7].Value.ToString();
+            rt_s_tablas.Range["K2"].Value = dgvDatosTabla.Rows[0].Cells[8].Value.ToString();
             rangoceldas = rt_s_tablas.Range["J2:K2"];
             rangoceldas.HorizontalAlignment = 3;
             rangoceldas.VerticalAlignment = 3;
@@ -1980,15 +1873,15 @@ namespace app_servicio_SADS2
 
                 //guardar excel del reporte 
                 string[] charsToRemove = new string[] { "/" };
-                string fecha = dgvDatosTabla.Rows[0].Cells[7].Value.ToString();
-                string id_tubo_r = dgvDatosTabla.Rows[0].Cells[0].Value.ToString();
+                string fecha = dgvDatosTabla.Rows[0].Cells[8].Value.ToString();
+                string id_rtubo = dgvDatosTabla.Rows[0].Cells[0].Value.ToString();
                 foreach (var c in charsToRemove)
                 {
                     fecha = fecha.Replace(c, string.Empty);
                 }
                 //NOMBRE PARA EL ARCHIVO DEL REPORTE
                 //R_IDP-(ID_PROYECTO)_IDT-(ID_TUBO)_f-(FECHA)
-                string nombre_reporte = "Tubo_" + tubo_nr + "_" + maquina_reporte + "_" + fecha;
+                string nombre_reporte = "Tubo_" + tubo_nr + "_" + maquina_reporte + "_F_" + fecha + "_NR" + id_rtubo;
                 string pat = path_reportes_excel + maquina_reporte + "\\" + nombre_reporte + ".xlsx";
                 rt_book.SaveAs(pat, oMissiong, oMissiong, oMissiong, oMissiong, oMissiong, Excel.XlSaveAsAccessMode.xlNoChange,
                                 oMissiong, oMissiong, oMissiong, oMissiong, oMissiong);
