@@ -38,7 +38,7 @@ namespace app_servicio_SADS2
         string P_url_externa1 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_1.php";
         string P_url_externa2 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_2.php";
         string P_url_externa3 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_3.php";
-        string version_app="version 1.2.0.21";
+        string version_app="version 1.2.0.23";
         
         //funcion principal
         public frmPrincipal()
@@ -636,7 +636,7 @@ namespace app_servicio_SADS2
                 foreach (var fi in di.GetFiles(fechabuscada))
                 {
 
-                    if (fi.Length > 6000)
+                    if (fi.Length > 65000)
                     {
                         ltbTemporal2.Items.Add(fi.Name);
                     }
@@ -671,7 +671,7 @@ namespace app_servicio_SADS2
                 foreach (var fi in di.GetFiles(fechabuscada))
                 {
 
-                    if (fi.Length > 95000)
+                    if (fi.Length > 65000)
                     {
                         ltbArchivosExcel.Items.Add(fi.Name);
                         ltbTemporal.Items.Add(fi.LastWriteTime.ToString());
@@ -904,6 +904,10 @@ namespace app_servicio_SADS2
         {
             string valor = "00";
             string minutos = inputboxvb.InputBox("Tiempo de poleo", "Ingresa los minutos", ref valor);
+            if (minutos=="" || minutos=="00")
+            {
+                minutos = "1";
+            }
             P_numero_minutos = Int32.Parse(minutos);
             tssLMinutosMon.Text = minutos + " min.";
         }
@@ -1090,6 +1094,10 @@ namespace app_servicio_SADS2
             string S02 = S01.Remove(i01, (S01.Length - i01));
             ltbTemporal.Items.Add(S02);
             int numero_archivos = Int32.Parse(S02);
+            if (numero_archivos == 0)
+            {
+                return;
+            }
             string[] array_string = new string[numero_archivos + 1];
             //separar los nombres de los archivos excel
             foreach (string substr in S01.Split(delimit))
