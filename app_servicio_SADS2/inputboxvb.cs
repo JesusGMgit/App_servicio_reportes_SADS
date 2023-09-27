@@ -17,15 +17,17 @@ namespace app_servicio_SADS2
             TextBox textBox = new TextBox();
             Button buttonOk = new Button();
             Button buttonCancel = new Button();
+            int numero_int;
 
+            bool es_o_no_numerico;
             form.Text = title;
             label.Text = promptText;
             textBox.Text = value;
+
             if (title=="CONTRASEÑA")
             {
                 textBox.PasswordChar = 'D';
-            }
-            
+            }                    
 
             buttonOk.Text = "OK";
             buttonCancel.Text = "Cancel";
@@ -53,6 +55,17 @@ namespace app_servicio_SADS2
             form.CancelButton = buttonCancel;
 
             DialogResult dialogResult = form.ShowDialog();
+            
+            if(title=="Tiempo de poleo")
+            {
+                es_o_no_numerico = int.TryParse(textBox.Text, out numero_int);
+                if (!es_o_no_numerico)
+                {
+                    textBox.Text="";
+                }
+            }
+                
+            
             return value = textBox.Text;
             //return dialogResult;
         }

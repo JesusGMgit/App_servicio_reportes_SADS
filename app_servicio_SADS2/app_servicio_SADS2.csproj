@@ -13,6 +13,7 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <IsWebBootstrapper>true</IsWebBootstrapper>
+    <TargetFrameworkProfile />
     <PublishUrl>ftp://10.10.20.15/app_servicio/</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
@@ -28,12 +29,11 @@
     <PublisherName>JGM_tubacero</PublisherName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>26</ApplicationRevision>
+    <ApplicationRevision>39</ApplicationRevision>
     <ApplicationVersion>1.2.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -93,6 +93,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Busqueda_tubo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Busqueda_tubo.Designer.cs">
+      <DependentUpon>Busqueda_tubo.cs</DependentUpon>
+    </Compile>
     <Compile Include="Consultas.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
@@ -114,6 +120,9 @@
     <Compile Include="Tuberia_ayer_tabla.cs" />
     <Compile Include="Tuberia_externa_tabla.cs" />
     <Compile Include="Tuberia_interna_tabla.cs" />
+    <EmbeddedResource Include="Busqueda_tubo.resx">
+      <DependentUpon>Busqueda_tubo.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -183,6 +192,8 @@
     <Content Include="logo-1.png" />
     <None Include="Resources\Close.png" />
     <None Include="Resources\Minimize.png" />
+    <None Include="Resources\AutoList.png" />
+    <None Include="Resources\table.png" />
     <Content Include="tubos2.ico" />
   </ItemGroup>
   <ItemGroup>

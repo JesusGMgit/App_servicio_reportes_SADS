@@ -20,7 +20,7 @@ namespace app_servicio_SADS2
         string pathP = @"C:\Users\Public\Documents\SMARTDAC+ Data Logging Software\Data\";
         string path_temporal = "", P_maquina_reporte;
         string path_reportes_excel = @"C:\xampp\htdocs\Reportes\";
-        int P_contador_tmr = 0, P_numero_minutos = 1;
+        int P_contador_tmr = 0, P_numero_minutos = 10;
         DateTime P_hora_anterior = new DateTime(2008, 08, 08, 08, 08, 08);
         //DateTime P_hora_registro_anterior, P_temporal_datetime;
         DateTime P_hora_now, P_fecha_ayer;
@@ -38,7 +38,7 @@ namespace app_servicio_SADS2
         string P_url_externa1 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_1.php";
         string P_url_externa2 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_2.php";
         string P_url_externa3 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_3.php";
-        string version_app="version 1.2.0.23";
+        string version_app="version 1.2.0.38";
         
         //funcion principal
         public frmPrincipal()
@@ -46,6 +46,12 @@ namespace app_servicio_SADS2
             InitializeComponent();
         }
 
+        string Obtener_fecha_ayer(string Fecha_hoy)
+        {
+            DateTime fecha_ayer = Convert.ToDateTime(Fecha_hoy).AddDays(-1);
+            return fecha_ayer.ToString("yyyy/MM/dd");
+
+        }
 
         #region funcionalidades del formulario
         [DllImport("user32.DLL", EntryPoint = "ReleaseCapture")]
@@ -83,6 +89,7 @@ namespace app_servicio_SADS2
             cmbManualMaquina.Items.Clear();
             cmbManualSoldadura.Items.Clear();
             btnIniciarAuto.Enabled = true;
+            btnAjustes.Enabled = true;
             btnPararAuto.Enabled = false;
             txbManualHoraFinal.Enabled = false;
             txbManualHoraInicial.Enabled = false;
@@ -174,11 +181,15 @@ namespace app_servicio_SADS2
             {
                 gpbModo.Enabled = false;
                 gpbModoManual.Enabled = false;
+                btnBusquedaTubo.Enabled = false;
+                button1.Enabled = false;
             }
             else
             {
                 gpbModo.Enabled = true;
                 gpbModoManual.Enabled = true;
+                btnBusquedaTubo.Enabled = true;
+                button1.Enabled = true;
             }
             
         }
@@ -280,7 +291,7 @@ namespace app_servicio_SADS2
                 //se oredena en forma ascedente la lista tomando en cuenta la columna
                 //de la base de datos (formato de la maria db)
                 tuberia_dataview.Sort = "T_hora_db ASC";
-                tabla_registros_a_ordenar = tuberia_dataview.ToTable();
+                //tabla_registros_a_ordenar = tuberia_dataview.ToTable();
                 
 
                 tuberia_dataview = tuberia_filtro_am.DefaultView;
@@ -340,17 +351,35 @@ namespace app_servicio_SADS2
             //si existen rregitros en la dataview con el filtro se reaocmoda
             if (num_12 > 0)
             {
-                for (int j = 1; j <= num_12; j++)
+                if (num_filas == 2 && num_12 == 1)
                 {
-                    object[] row_12 = tabla_temporal_reacomodar.Rows[num_filas - 1].ItemArray;
-                    for (int i = num_filas - 2; i > 0; i--)
+                    //Cuando hay solo dos registros y uno es un  registro con 12:00 a/pm
+                    //entonces se hace el intercambio solo una vez
+                    //checar si no hay fallas a la hora ponerlo a correr en el programa principal
+                    object[] row_inter1 = tabla_temporal_reacomodar.Rows[0].ItemArray;
+                    object[] row_inter2 = tabla_temporal_reacomodar.Rows[1].ItemArray;
+                    tabla_temporal_reacomodar.Rows[1].ItemArray = row_inter1;
+                    tabla_temporal_reacomodar.Rows[0].ItemArray = row_inter2;
+
+                }
+                else
+                { 
+                    for (int j = 1; j <= num_12; j++)
                     {
-                        object[] row_inter1 = tabla_temporal_reacomodar.Rows[i].ItemArray;
-                        object[] row_inter2 = tabla_temporal_reacomodar.Rows[i - 1].ItemArray;
-                        tabla_temporal_reacomodar.Rows[i + 1].ItemArray = row_inter1;
-                        tabla_temporal_reacomodar.Rows[i].ItemArray = row_inter2;
+                        
+                            object[] row_12 = tabla_temporal_reacomodar.Rows[num_filas - 1].ItemArray;
+                            //aqui si hay mas de 2 registros en la tabla para reacomodar el(los) que tiene(n)
+                            //el 12:00 a/pm y la i no puede empezar en 0
+                            for (int i = num_filas - 2; i > 0; i--)
+                            {
+                                object[] row_inter1 = tabla_temporal_reacomodar.Rows[i].ItemArray;
+                                object[] row_inter2 = tabla_temporal_reacomodar.Rows[i - 1].ItemArray;
+                                tabla_temporal_reacomodar.Rows[i + 1].ItemArray = row_inter1;
+                                tabla_temporal_reacomodar.Rows[i].ItemArray = row_inter2;
+                            }
+                            tabla_temporal_reacomodar.Rows[0].ItemArray = row_12;
+                          
                     }
-                    tabla_temporal_reacomodar.Rows[0].ItemArray = row_12;
                 }
 
             }
@@ -409,7 +438,7 @@ namespace app_servicio_SADS2
 
         void Rellenar_tabla_proyectos(string nom_proyecto)
         {
-            string url_proyecto = "http://10.10.20.15/backend/api/ar_tProyectos.php?Pro_ID" + nom_proyecto;
+            string url_proyecto = "http://10.10.20.15/backend/api/ar_tProyectos.php?Pro_ID=" + nom_proyecto;
             var resultado_proyecto=Consultas.Get_API(url_proyecto);
             List<Proyecto_tabla> temporal_results = JsonConvert.DeserializeObject<List<Proyecto_tabla>>(resultado_proyecto);
             foreach (var r in temporal_results)
@@ -654,6 +683,7 @@ namespace app_servicio_SADS2
         void Buscar_archivos_excel(string path_archivos, string fecha_archivos)
         {
             //ltbArchivosExcel.Items.Clear();
+           
             try
             {
 
@@ -667,7 +697,9 @@ namespace app_servicio_SADS2
                 {
                     fechabuscada = "*" + fecha_archivos + "*?.txt";
                 }
+
                 
+
                 foreach (var fi in di.GetFiles(fechabuscada))
                 {
 
@@ -906,7 +938,7 @@ namespace app_servicio_SADS2
             string minutos = inputboxvb.InputBox("Tiempo de poleo", "Ingresa los minutos", ref valor);
             if (minutos=="" || minutos=="00")
             {
-                minutos = "1";
+                minutos = "10";
             }
             P_numero_minutos = Int32.Parse(minutos);
             tssLMinutosMon.Text = minutos + " min.";
@@ -915,6 +947,7 @@ namespace app_servicio_SADS2
         private void frmPrincipal_FormClosing(object sender, FormClosingEventArgs e)
         {
             Properties.Settings.Default.Gnumero_minutos = P_numero_minutos;
+            Properties.Settings.Default.Save();
         }
 
         private void tmrMonitoreo_Tick(object sender, EventArgs e)
@@ -997,8 +1030,10 @@ namespace app_servicio_SADS2
         private void btnBusquedaFecha_Click(object sender, EventArgs e)
         {
             //iniciar almacenando variables para busqueda de archivos
+            string fecha_ayer;
             P_fecha_busqueda = txbManualFecha.Text;
-
+            
+            
             Limpiar_tabla_fecha(cmbManualSoldadura.Text, cmbManualMaquina.Text);
                 
             dgvDatosTabla.DataSource = P_Tuberia_datatable;
@@ -1012,7 +1047,13 @@ namespace app_servicio_SADS2
             ltbArchivosExcel.Items.Clear();
             //buscar archivos excel en la fecha dada
             Buscar_archivos_excel(pathP + manual_carpeta, fecha_nom_archivo);
-            
+
+            if (ckbDA.Checked)
+            {
+                fecha_ayer = Obtener_fecha_ayer(P_fecha_busqueda);
+                fecha_ayer = fecha_ayer.Replace("/", "");
+                Buscar_archivos_excel_ayer(pathP + manual_carpeta, fecha_ayer);
+            }
             //limpiar la lista temporal de datos
             lblTemporal.Text = "";
             tssLEstado.Text = "esperando hora";
@@ -1028,6 +1069,7 @@ namespace app_servicio_SADS2
             DataView tablaview_temporal;
             //asignar a variables la hora inicial y final de busqueda de archivos excel
             string manual_carpeta = "MONITOREO_" + cmbManualMaquina.Text;
+            string fecha_Ayer;
             DateTime hora_antes_ayer;
             if ((txbManualHoraInicial.Text != "") && (txbManualHoraFinal.Text != ""))
             {
@@ -1035,8 +1077,9 @@ namespace app_servicio_SADS2
                 hora_final = P_fecha_busqueda + " " + txbManualHoraFinal.Text;
                 if (ckbDA.Checked==true)
                 {
-                    hora_antes_ayer = Convert.ToDateTime(hora_inicial).AddDays(-1);
-                    hora_inicial = hora_antes_ayer.ToString("yyyy/MM/dd hh:mm:ss tt");
+                    fecha_Ayer = Obtener_fecha_ayer(P_fecha_busqueda);
+                    hora_inicial = fecha_Ayer + " " + txbManualHoraInicial.Text;
+                    P_auto_un_registro = true;
                 }
                 
                 string tubo_hora = "T_hora=" + "'" + txbManualHoraFinal.Text + "'";
@@ -1054,13 +1097,20 @@ namespace app_servicio_SADS2
                 guardar_archivos_excel_tubo(hora_inicial, hora_final, manual_carpeta, cmbManualSoldadura.Text, cmbManualMaquina.Text);
             }
         }
+
+        private void btnBusquedaTubo_Click(object sender, EventArgs e)
+        {
+            Busqueda_tubo frm = new Busqueda_tubo();
+            frm.ShowDialog();
+        }
+
         private void button2_Click(object sender, EventArgs e)
         {
             if (this.Height != 545)
             {
                 string valor = "CONTRASEÑA";
                 string contraseña = inputboxvb.InputBox("CONTRASEÑA", "ESCRIBE", ref valor);
-                ptbIndicador2.Image = iglImagenes.Images[6];
+               
                 if (contraseña == "JGM")
                 {
                     cmbManualSoldadura.Items.Add("INTERNA");
@@ -1071,7 +1121,9 @@ namespace app_servicio_SADS2
                     btnModoManual.Text = "CERRAR";
                     btnIniciarAuto.Enabled = false;
                     btnPararAuto.Enabled = false;
+                    btnAjustes.Enabled = false;
                     tssLEstado.Text = "Modo Manual";
+                    ptbIndicador2.Image = iglImagenes.Images[6];
                 }
             }
             else
@@ -1112,808 +1164,821 @@ namespace app_servicio_SADS2
 
             }
 
-            //abrir archivos excel
-            //crear archivo excel para reporte
-
-            Excel.Application reporte_tuberia = new Excel.Application();
-            Excel.Workbook rt_book = reporte_tuberia.Workbooks.Add();
-            Excel.Worksheet rt_sheet = (Excel.Worksheet)rt_book.Worksheets[1];
-
-            Excel.Worksheet rt_s_tablas = (Excel.Worksheet)rt_book.Worksheets.Add();
-
-            //Excel.Shapes imagen_logo = (Excel.Shapes)rt_s_tablas.Shapes;
-            Excel.Range rangoceldas;
-            rt_sheet.Name = "DATOS TUBERIA";
-            //rt_s_tablas.Name = "tabla";
-
-            //arcvhivo excel para abrir los archivos con datos de soldadura
-            Excel.Application archivo_excel = new Excel.Application();
-            Excel.Workbook ae_book = null;
-            object oMissiong = System.Reflection.Missing.Value;
-            int r = 0;
-            int rango;
-            int rango_anterior = 0;
-            string temporal_celda;
-            //abrir archivos excel 
-            string path_archivos_excel;
-
-            //-------------------------------------------------------------------------
-            //PAGINA 1 DEL LIBRO EXCEL DATOS DE TUBERIA Y PORMEDIOS DE SOLDADURA
-
-            //desabilita funciones para crear reporte
-            Desabilitar_botones_ce(true);
-            ptbIndicador1.Image = iglImagenes.Images[16];
-
-            //empieza creacion de reporte 
-            //solicitar datos del proyecto
-            P_proyecto_datatable.Clear();
-            Rellenar_tabla_proyectos(dgvDatosTabla.Rows[0].Cells[4].Value.ToString());
-            P_operador_datatable.Clear();
-            Rellenar_tabla_operador(dgvDatosTabla.Rows[0].Cells[7].Value.ToString());
-            //dar formato a tabla
-            //encabezado
-            /*string directorio_resource = Directory.GetCurrentDirectory();
-            imagen_logo.AddPicture(directorio_resource, Microsoft.Office.Core.MsoTriState.msoFalse,
-                Microsoft.Office.Core.MsoTriState.msoCTrue, rt_sheet.Range["A1"].Left, rt_sheet.Range["A1"].Top,
-                200, 100);*/
-            rangoceldas = rt_sheet.Range["F2:L2"];
-            rangoceldas.Merge();
-            rangoceldas.FormulaR1C1 = "TUBACERO S. DE R.L. DE C.V.";
-            rangoceldas.HorizontalAlignment = 3;
-            rangoceldas.VerticalAlignment = 3;
-            rangoceldas.Font.Size = 27;
-            rangoceldas.Font.Bold = true;
-            rangoceldas = rt_sheet.Range["E3:K3"];
-            rangoceldas.Merge();
-            rangoceldas.FormulaR1C1 = "REPORTE DE PARAMEROS DE SOLDADURA POR TUBO";
-            rangoceldas.HorizontalAlignment = 3;
-            rangoceldas.VerticalAlignment = 3;
-            rangoceldas.Font.Size = 16;
-            rangoceldas.Font.Bold = true;
-            //datos del reporte
-
-            rangoceldas = rt_sheet.Range["A5:P24"];
-            rangoceldas.Font.Size = 16;
-            rt_sheet.Range["O5"].Value = "FECHA:";
-            rt_sheet.Range["P5"].Value = dgvDatosTabla.Rows[0].Cells[8].Value.ToString();
-            rt_sheet.Range["P5"].Font.Bold = true;
-            rt_sheet.Range["O6"].Value = "HORA:";
-            rt_sheet.Range["P6"].Value = dgvDatosTabla.Rows[0].Cells[9].Value.ToString();
-            rt_sheet.Range["P6"].Font.Bold = true;
-            //datos del proyecto
-            rt_sheet.Range["A5"].Value = "DATOS DEL PROYECTO";
-            rt_sheet.Range["A6"].Value = "NOMBRE";
-            rt_sheet.Range["C6"].Value = P_proyecto_datatable.Rows[0]["Nombre"].ToString();
-            rt_sheet.Range["C6"].Font.Bold = true;
-            rt_sheet.Range["A7"].Value = "ESPECIFICACION";
-            rt_sheet.Range["C7"].Value = P_proyecto_datatable.Rows[0]["Especificacion"].ToString();
-            rt_sheet.Range["C7"].Font.Bold = true;
-            rt_sheet.Range["A8"].Value = "ORDEN DE TRABAJO";
-            rt_sheet.Range["C8"].Value = P_proyecto_datatable.Rows[0]["OrdenTrabajo"].ToString();
-            rt_sheet.Range["C8"].Font.Bold = true;
-            //datos del tubo
-            rt_sheet.Range["G5"].Value = "DATOS DEL TUBO";
-            rt_sheet.Range["G6"].Value = "No. TUBO:";
-            string tubo_nr = dgvDatosTabla.Rows[0].Cells[2].Value.ToString();
-            rt_sheet.Range["I6"].Value = tubo_nr;
-            rt_sheet.Range["I6"].Font.Bold = true;
-            rt_sheet.Range["G7"].Value = "No. PLACA:";
-            string placa_nr= dgvDatosTabla.Rows[0].Cells[3].Value.ToString();
-            rt_sheet.Range["I7"].Value = placa_nr;
-            rt_sheet.Range["I7"].Font.Bold = true;
-            rt_sheet.Range["J6"].Value = "DIAMETRO:";
-            rt_sheet.Range["L6"].Value = P_proyecto_datatable.Rows[0]["Diametro"].ToString();
-            rt_sheet.Range["L6"].Font.Bold = true;
-            rt_sheet.Range["J7"].Value = "ESPESOR:";
-            rt_sheet.Range["L7"].Value = P_proyecto_datatable.Rows[0]["Espesor"].ToString();
-            rt_sheet.Range["L7"].Font.Bold = true;
-            //datos de alambre y fundente
-            rt_sheet.Range["A9"].Value = "DATOS DE ALAMBRE Y FUNDENTE";
-            rt_sheet.Range["A10"].Value = "ALAMBRE:";
-            rt_sheet.Range["C10"].Value = P_proyecto_datatable.Rows[0]["Alambre"].ToString();
-            rt_sheet.Range["C10"].Font.Bold = true;
-            rt_sheet.Range["E10"].Value = "LOTE:";
-            rt_sheet.Range["F10"].Value = dgvDatosTabla.Rows[0].Cells[5].Value.ToString();
-            rt_sheet.Range["F10"].Font.Bold = true;
-            rt_sheet.Range["I10"].Value = "FUNDENTE:";
-            rt_sheet.Range["K10"].Value = P_proyecto_datatable.Rows[0]["Fundente"].ToString();
-            rt_sheet.Range["K10"].Font.Bold = true;
-            rt_sheet.Range["M10"].Value = "LOTE:";
-            rt_sheet.Range["N10"].Value = dgvDatosTabla.Rows[0].Cells[6].Value.ToString();
-            rt_sheet.Range["N10"].Font.Bold = true;
-
-            //datos del operador
-            rt_sheet.Range["A12"].Value = "DATOS DE OPERADOR";
-            rt_sheet.Range["A13"].Value = "MAQUINA";
-            rt_sheet.Range["C13"].Value = maquina_reporte;
-            rt_sheet.Range["C13"].Font.Bold = true;
-            rt_sheet.Range["E13"].Value = "TURNO";
-            rt_sheet.Range["G13"].Value = "no aplica";
-            rt_sheet.Range["G13"].Font.Bold = true;
-            rt_sheet.Range["A14"].Value = "OPERADOR";
-            rt_sheet.Range["C14"].Value = P_operador_datatable.Rows[0]["Nombre"].ToString();
-            rt_sheet.Range["C14"].Font.Bold = true;
-            rt_sheet.Range["H14"].Value = "FOLIO";
-            rt_sheet.Range["I14"].Value = P_operador_datatable.Rows[0]["Folio"].ToString();
-            rt_sheet.Range["I14"].Font.Bold = true;
-            rt_sheet.Range["K14"].Value = "CS-";
-            rt_sheet.Range["L14"].Value = P_operador_datatable.Rows[0]["Clave_soldador"];
-            rt_sheet.Range["L14"].Font.Bold = true;
-            rt_sheet.Range["A15"].Value = "SUPERVISOR";
-            rt_sheet.Range["C15"].Value = "sin datos";
-            rt_sheet.Range["C15"].Font.Bold = true;
-            rt_sheet.Range["H15"].Value = "FOLIO";
-            rt_sheet.Range["I15"].Value = "sin datos";
-            rt_sheet.Range["I15"].Font.Bold = true;
-            rt_sheet.Range["A16"].Value = "OBSERVACIONES";
-            rt_sheet.Range["C16"].Value = dgvDatosTabla.Rows[0].Cells[12].Value.ToString();
-            rt_sheet.Range["C16"].Font.Bold = true;
-            //PROMEDIO DE PARAMETROS
-            rt_sheet.Range["A18"].Value = "PROMEDIOS PARAMETROS MEDIDOS";
-            rt_sheet.Range["A19"].Value = "CORRIENTE CD";
-            rt_sheet.Range["C19"].Value = "VOLTAJE CD";
-            rt_sheet.Range["E19"].Value = "CORRIENTE AC-1";
-            rt_sheet.Range["G19"].Value = "VOLTAJE AC-1";
-            rt_sheet.Range["I19"].Value = "CORRIENTE AC-2";
-            rt_sheet.Range["K19"].Value = "VOLTAJE AC-2";
-            if (maquina_reporte.Contains("EXTERNA"))
+            try
             {
-                rt_sheet.Range["M19"].Value = "CORRIENTE AC-3";
-                rt_sheet.Range["O19"].Value = "VOLTAJE AC-3";
-                rt_sheet.Range["M22"].Value = "POTENCIA CA-3";
-            }
+                //abrir archivos excel
+                //crear archivo excel para reporte
 
-            rt_sheet.Range["A22"].Value = "POTENCIA CD";
-            rt_sheet.Range["E22"].Value = "POTENCIA CA-1";
-            rt_sheet.Range["I22"].Value = "POTENCIA CA-2";
+                Excel.Application reporte_tuberia = new Excel.Application();
+                Excel.Workbook rt_book = reporte_tuberia.Workbooks.Add();
+                Excel.Worksheet rt_sheet = (Excel.Worksheet)rt_book.Worksheets[1];
 
-            rangoceldas = rt_sheet.Range["A20:O20"];
-            rangoceldas.Font.Bold = true;
-            rangoceldas = rt_sheet.Range["A23:O23"];
-            rangoceldas.Font.Bold = true;
-            rangoceldas = rt_sheet.Range["A1:P24"];
-            rangoceldas.Borders.Color = Color.White;
+                Excel.Worksheet rt_s_tablas = (Excel.Worksheet)rt_book.Worksheets.Add();
 
-            //-------------------------------------------------------------------------
-            //PAGINA 2 DEL LIBRO EXCEL- TABLA DE VALORES DE PARAMETROS DE SOLDADURA
+                //Excel.Shapes imagen_logo = (Excel.Shapes)rt_s_tablas.Shapes;
+                Excel.Range rangoceldas;
+                rt_sheet.Name = "DATOS TUBERIA";
+                //rt_s_tablas.Name = "tabla";
 
-            rangoceldas = rt_s_tablas.Range["C2:H2"];
-            rangoceldas.HorizontalAlignment = 3;
-            rangoceldas.VerticalAlignment = 3;
-            rangoceldas.Font.Size = 16;
-            rangoceldas.Font.Bold = true;
-            rangoceldas.Merge();
-            rangoceldas.Value = "VALORES REGISTRADOS DE PARAMETROS";
-            rt_s_tablas.Range["J2"].Value = "FECHA:";
-            rt_s_tablas.Range["K2"].Value = dgvDatosTabla.Rows[0].Cells[8].Value.ToString();
-            rangoceldas = rt_s_tablas.Range["J2:K2"];
-            rangoceldas.HorizontalAlignment = 3;
-            rangoceldas.VerticalAlignment = 3;
-            rangoceldas.Font.Size = 16;
-            rangoceldas.Font.Bold = true;
-            rt_s_tablas.Range["A5"].Value = "HORA";
-            rt_s_tablas.Range["C5"].Value = "VOLTAJE CD";
-            rt_s_tablas.Range["E5"].Value = "AMPERAJE CD";
-            rt_s_tablas.Range["G5"].Value = "VOLTAJE CA-1";
-            rt_s_tablas.Range["I5"].Value = "AMPERAJE CA-1";
-            rt_s_tablas.Range["K5"].Value = "VOLTAJE CA-2";
-            rt_s_tablas.Range["M5"].Value = "AMPERAJE CA-2";
+                //arcvhivo excel para abrir los archivos con datos de soldadura
+                Excel.Application archivo_excel = new Excel.Application();
+                Excel.Workbook ae_book = null;
+                object oMissiong = System.Reflection.Missing.Value;
+                int r = 0;
+                int rango;
+                int rango_anterior = 0;
+                string temporal_celda;
+                //abrir archivos excel 
+                string path_archivos_excel;
 
-            if (maquina_reporte.Contains("EXTERNA"))
-            {
-                rt_s_tablas.Range["O5"].Value = "VOLTAJE CA-3";
-                rt_s_tablas.Range["Q5"].Value = "AMPERAJE CA-3";
-                rt_s_tablas.Range["Y5"].Value = "POTENCIA CA-3";
+                //-------------------------------------------------------------------------
+                //PAGINA 1 DEL LIBRO EXCEL DATOS DE TUBERIA Y PORMEDIOS DE SOLDADURA
 
-            }
-            rt_s_tablas.Range["S5"].Value = "POTENCIA CD";
-            rt_s_tablas.Range["U5"].Value = "POTENCIA CA-1";
-            rt_s_tablas.Range["W5"].Value = "POTENCIA CA-2";
+                //desabilita funciones para crear reporte
+                Desabilitar_botones_ce(true);
+                ptbIndicador1.Image = iglImagenes.Images[16];
 
-            rango_anterior = 6;
+                //empieza creacion de reporte 
+                //solicitar datos del proyecto
+                P_proyecto_datatable.Clear();
+                Rellenar_tabla_proyectos(dgvDatosTabla.Rows[0].Cells[4].Value.ToString());
+                P_operador_datatable.Clear();
+                Rellenar_tabla_operador(dgvDatosTabla.Rows[0].Cells[7].Value.ToString());
+                //dar formato a tabla
+                //encabezado
+                /*string directorio_resource = Directory.GetCurrentDirectory();
+                imagen_logo.AddPicture(directorio_resource, Microsoft.Office.Core.MsoTriState.msoFalse,
+                    Microsoft.Office.Core.MsoTriState.msoCTrue, rt_sheet.Range["A1"].Left, rt_sheet.Range["A1"].Top,
+                    200, 100);*/
+                rangoceldas = rt_sheet.Range["F2:L2"];
+                rangoceldas.Merge();
+                rangoceldas.FormulaR1C1 = "TUBACERO S. DE R.L. DE C.V.";
+                rangoceldas.HorizontalAlignment = 3;
+                rangoceldas.VerticalAlignment = 3;
+                rangoceldas.Font.Size = 27;
+                rangoceldas.Font.Bold = true;
+                rangoceldas = rt_sheet.Range["E3:K3"];
+                rangoceldas.Merge();
+                rangoceldas.FormulaR1C1 = "REPORTE DE PARAMEROS DE SOLDADURA POR TUBO";
+                rangoceldas.HorizontalAlignment = 3;
+                rangoceldas.VerticalAlignment = 3;
+                rangoceldas.Font.Size = 16;
+                rangoceldas.Font.Bold = true;
+                //datos del reporte
 
-            if (ckbExcel.Checked == false)
-            {
-                string[] array_temporal = array_string;
-                string path_temporal_txt;
-                string path_temporal_nuevo = @"C:\Users\Public\Documents\SMARTDAC+ Data Logging Software\Data\";
-                for (int i = 1; i < array_temporal.Length; i++)
+                rangoceldas = rt_sheet.Range["A5:P24"];
+                rangoceldas.Font.Size = 16;
+                rt_sheet.Range["O5"].Value = "FECHA:";
+                rt_sheet.Range["P5"].Value = dgvDatosTabla.Rows[0].Cells[8].Value.ToString();
+                rt_sheet.Range["P5"].Font.Bold = true;
+                rt_sheet.Range["O6"].Value = "HORA:";
+                rt_sheet.Range["P6"].Value = dgvDatosTabla.Rows[0].Cells[9].Value.ToString();
+                rt_sheet.Range["P6"].Font.Bold = true;
+                //datos del proyecto
+                rt_sheet.Range["A5"].Value = "DATOS DEL PROYECTO";
+                rt_sheet.Range["A6"].Value = "NOMBRE";
+                rt_sheet.Range["C6"].Value = P_proyecto_datatable.Rows[0]["Nombre"].ToString();
+                rt_sheet.Range["C6"].Font.Bold = true;
+                rt_sheet.Range["A7"].Value = "ESPECIFICACION";
+                rt_sheet.Range["C7"].Value = P_proyecto_datatable.Rows[0]["Especificacion"].ToString();
+                rt_sheet.Range["C7"].Font.Bold = true;
+                rt_sheet.Range["A8"].Value = "ORDEN DE TRABAJO";
+                rt_sheet.Range["C8"].Value = P_proyecto_datatable.Rows[0]["OrdenTrabajo"].ToString();
+                rt_sheet.Range["C8"].Font.Bold = true;
+                //datos del tubo
+                rt_sheet.Range["G5"].Value = "DATOS DEL TUBO";
+                rt_sheet.Range["G6"].Value = "No. TUBO:";
+                string tubo_nr = dgvDatosTabla.Rows[0].Cells[2].Value.ToString();
+                rt_sheet.Range["I6"].Value = tubo_nr;
+                rt_sheet.Range["I6"].Font.Bold = true;
+                rt_sheet.Range["G7"].Value = "No. PLACA:";
+                string placa_nr = dgvDatosTabla.Rows[0].Cells[3].Value.ToString();
+                rt_sheet.Range["I7"].Value = placa_nr;
+                rt_sheet.Range["I7"].Font.Bold = true;
+                rt_sheet.Range["J6"].Value = "DIAMETRO:";
+                rt_sheet.Range["L6"].Value = P_proyecto_datatable.Rows[0]["Diametro"].ToString();
+                rt_sheet.Range["L6"].Font.Bold = true;
+                rt_sheet.Range["J7"].Value = "ESPESOR:";
+                rt_sheet.Range["L7"].Value = P_proyecto_datatable.Rows[0]["Espesor"].ToString();
+                rt_sheet.Range["L7"].Font.Bold = true;
+                //datos de alambre y fundente
+                rt_sheet.Range["A9"].Value = "DATOS DE ALAMBRE Y FUNDENTE";
+                rt_sheet.Range["A10"].Value = "ALAMBRE:";
+                rt_sheet.Range["C10"].Value = P_proyecto_datatable.Rows[0]["Alambre"].ToString();
+                rt_sheet.Range["C10"].Font.Bold = true;
+                rt_sheet.Range["E10"].Value = "LOTE:";
+                rt_sheet.Range["F10"].Value = dgvDatosTabla.Rows[0].Cells[5].Value.ToString();
+                rt_sheet.Range["F10"].Font.Bold = true;
+                rt_sheet.Range["I10"].Value = "FUNDENTE:";
+                rt_sheet.Range["K10"].Value = P_proyecto_datatable.Rows[0]["Fundente"].ToString();
+                rt_sheet.Range["K10"].Font.Bold = true;
+                rt_sheet.Range["M10"].Value = "LOTE:";
+                rt_sheet.Range["N10"].Value = dgvDatosTabla.Rows[0].Cells[6].Value.ToString();
+                rt_sheet.Range["N10"].Font.Bold = true;
+
+                //datos del operador
+                rt_sheet.Range["A12"].Value = "DATOS DE OPERADOR";
+                rt_sheet.Range["A13"].Value = "MAQUINA";
+                rt_sheet.Range["C13"].Value = maquina_reporte;
+                rt_sheet.Range["C13"].Font.Bold = true;
+                rt_sheet.Range["E13"].Value = "TURNO";
+                rt_sheet.Range["G13"].Value = "no aplica";
+                rt_sheet.Range["G13"].Font.Bold = true;
+                rt_sheet.Range["A14"].Value = "OPERADOR";
+                rt_sheet.Range["C14"].Value = P_operador_datatable.Rows[0]["Nombre"].ToString();
+                rt_sheet.Range["C14"].Font.Bold = true;
+                rt_sheet.Range["H14"].Value = "FOLIO";
+                rt_sheet.Range["I14"].Value = P_operador_datatable.Rows[0]["Folio"].ToString();
+                rt_sheet.Range["I14"].Font.Bold = true;
+                rt_sheet.Range["K14"].Value = "CS-";
+                rt_sheet.Range["L14"].Value = P_operador_datatable.Rows[0]["Clave_soldador"];
+                rt_sheet.Range["L14"].Font.Bold = true;
+                rt_sheet.Range["A15"].Value = "SUPERVISOR";
+                rt_sheet.Range["C15"].Value = "sin datos";
+                rt_sheet.Range["C15"].Font.Bold = true;
+                rt_sheet.Range["H15"].Value = "FOLIO";
+                rt_sheet.Range["I15"].Value = "sin datos";
+                rt_sheet.Range["I15"].Font.Bold = true;
+                rt_sheet.Range["A16"].Value = "OBSERVACIONES";
+                rt_sheet.Range["C16"].Value = dgvDatosTabla.Rows[0].Cells[12].Value.ToString();
+                rt_sheet.Range["C16"].Font.Bold = true;
+                //PROMEDIO DE PARAMETROS
+                rt_sheet.Range["A18"].Value = "PROMEDIOS PARAMETROS MEDIDOS";
+                rt_sheet.Range["A19"].Value = "CORRIENTE CD";
+                rt_sheet.Range["C19"].Value = "VOLTAJE CD";
+                rt_sheet.Range["E19"].Value = "CORRIENTE AC-1";
+                rt_sheet.Range["G19"].Value = "VOLTAJE AC-1";
+                rt_sheet.Range["I19"].Value = "CORRIENTE AC-2";
+                rt_sheet.Range["K19"].Value = "VOLTAJE AC-2";
+                if (maquina_reporte.Contains("EXTERNA"))
                 {
-                    path_temporal_txt = path_temporal + array_temporal[i];
-                    path_temporal_nuevo = path_temporal_nuevo + array_temporal[i];
-                    File.Copy(path_temporal_txt, path_temporal_nuevo);
-
-                    File.Move(path_temporal_nuevo, Path.ChangeExtension(path_temporal_txt, ".csv"));
-                    array_string[i] = array_string[i].Replace(".txt", ".csv");
-                    File.Delete(path_temporal_nuevo);
+                    rt_sheet.Range["M19"].Value = "CORRIENTE AC-3";
+                    rt_sheet.Range["O19"].Value = "VOLTAJE AC-3";
+                    rt_sheet.Range["M22"].Value = "POTENCIA CA-3";
                 }
-            }
-            for (int i = 1; i < array_string.Length; i++)
-            {
+
+                rt_sheet.Range["A22"].Value = "POTENCIA CD";
+                rt_sheet.Range["E22"].Value = "POTENCIA CA-1";
+                rt_sheet.Range["I22"].Value = "POTENCIA CA-2";
+
+                rangoceldas = rt_sheet.Range["A20:O20"];
+                rangoceldas.Font.Bold = true;
+                rangoceldas = rt_sheet.Range["A23:O23"];
+                rangoceldas.Font.Bold = true;
+                rangoceldas = rt_sheet.Range["A1:P24"];
+                rangoceldas.Borders.Color = Color.White;
+
+                //-------------------------------------------------------------------------
+                //PAGINA 2 DEL LIBRO EXCEL- TABLA DE VALORES DE PARAMETROS DE SOLDADURA
+
+                rangoceldas = rt_s_tablas.Range["C2:H2"];
+                rangoceldas.HorizontalAlignment = 3;
+                rangoceldas.VerticalAlignment = 3;
+                rangoceldas.Font.Size = 16;
+                rangoceldas.Font.Bold = true;
+                rangoceldas.Merge();
+                rangoceldas.Value = "VALORES REGISTRADOS DE PARAMETROS";
+                rt_s_tablas.Range["J2"].Value = "FECHA:";
+                rt_s_tablas.Range["K2"].Value = dgvDatosTabla.Rows[0].Cells[8].Value.ToString();
+                rangoceldas = rt_s_tablas.Range["J2:K2"];
+                rangoceldas.HorizontalAlignment = 3;
+                rangoceldas.VerticalAlignment = 3;
+                rangoceldas.Font.Size = 16;
+                rangoceldas.Font.Bold = true;
+                rt_s_tablas.Range["A5"].Value = "HORA";
+                rt_s_tablas.Range["C5"].Value = "VOLTAJE CD";
+                rt_s_tablas.Range["E5"].Value = "AMPERAJE CD";
+                rt_s_tablas.Range["G5"].Value = "VOLTAJE CA-1";
+                rt_s_tablas.Range["I5"].Value = "AMPERAJE CA-1";
+                rt_s_tablas.Range["K5"].Value = "VOLTAJE CA-2";
+                rt_s_tablas.Range["M5"].Value = "AMPERAJE CA-2";
+
+                if (maquina_reporte.Contains("EXTERNA"))
+                {
+                    rt_s_tablas.Range["O5"].Value = "VOLTAJE CA-3";
+                    rt_s_tablas.Range["Q5"].Value = "AMPERAJE CA-3";
+                    rt_s_tablas.Range["Y5"].Value = "POTENCIA CA-3";
+
+                }
+                rt_s_tablas.Range["S5"].Value = "POTENCIA CD";
+                rt_s_tablas.Range["U5"].Value = "POTENCIA CA-1";
+                rt_s_tablas.Range["W5"].Value = "POTENCIA CA-2";
+
+                rango_anterior = 6;
+
+                if (ckbExcel.Checked == false)
+                {
+                    string[] array_temporal = array_string;
+                    string path_temporal_txt;
+                    string path_temporal_nuevo = @"C:\Users\Public\Documents\SMARTDAC+ Data Logging Software\Data\";
+                    for (int i = 1; i < array_temporal.Length; i++)
+                    {
+                        path_temporal_txt = path_temporal + array_temporal[i];
+                        path_temporal_nuevo = path_temporal_nuevo + array_temporal[i];
+                        File.Copy(path_temporal_txt, path_temporal_nuevo);
+
+                        File.Move(path_temporal_nuevo, Path.ChangeExtension(path_temporal_txt, ".csv"));
+                        array_string[i] = array_string[i].Replace(".txt", ".csv");
+                        File.Delete(path_temporal_nuevo);
+                    }
+                }
+                for (int i = 1; i < array_string.Length; i++)
+                {
+                    try
+                    {
+                        path_archivos_excel = path_temporal + array_string[i];
+                        //Abrir archivo de datos de soldadura
+                        ae_book = archivo_excel.Workbooks.Open(path_archivos_excel);
+                        Excel.Worksheet ae_sheet = (Excel.Worksheet)ae_book.Worksheets.Item[1];
+                        r = ae_sheet.UsedRange.Rows.Count;
+                        lblTemporal.Text = r.ToString();
+                        rango = r - 39;
+                        rt_s_tablas.Range["A5:Y" + (rango + rango_anterior)].Font.Size = 14;
+
+                        //valores de hora
+                        temporal_celda = "A" + (rango_anterior).ToString() + ":A" + (rango + rango_anterior - 1).ToString();
+                        rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("B40:B" + r.ToString())].Value2;
+                        if (maquina_reporte.Contains("EXTERNA"))
+                        {
+                            //celdas pra reportes de externas incluye CA3
+                            //valores de voltaje de CA3
+                            temporal_celda = "O" + (rango_anterior).ToString() + ":O" + (rango + rango_anterior - 1).ToString();
+                            rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("H40:H" + r.ToString())].Value2; ;
+                            //valores de corriente de CA3
+                            temporal_celda = "Q" + (rango_anterior).ToString() + ":Q" + (rango + rango_anterior - 1).ToString();
+                            rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("I40:I" + r.ToString())].Value2;
+                            //valores de voltaje de CD
+                            temporal_celda = "C" + (rango_anterior).ToString() + ":C" + (rango + rango_anterior - 1).ToString();
+                            rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("J40:J" + r.ToString())].Value2;
+                            //valores de corriente de CD
+                            temporal_celda = "E" + (rango_anterior).ToString() + ":E" + (rango + rango_anterior - 1).ToString();
+                            rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("K40:K" + r.ToString())].Value2;
+
+                            //valores de potencia CD
+                            temporal_celda = "S" + (rango_anterior).ToString() + ":S" + (rango + rango_anterior - 1).ToString();
+                            rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("O40:O" + r.ToString())].Value2;
+                            //valores de potencia CA-1
+                            temporal_celda = "U" + (rango_anterior).ToString() + ":U" + (rango + rango_anterior - 1).ToString();
+                            rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("L40:L" + r.ToString())].Value2;
+                            //valores de potencia CA-2
+                            temporal_celda = "W" + (rango_anterior).ToString() + ":W" + (rango + rango_anterior - 1).ToString();
+                            rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("M40:M" + r.ToString())].Value2;
+                            //valores de potencia CA-3
+                            temporal_celda = "Y" + (rango_anterior).ToString() + ":Y" + (rango + rango_anterior - 1).ToString();
+                            rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("N40:N" + r.ToString())].Value2;
+
+                        }
+                        else
+                        {
+                            //CELDAS PARA REPORTE DE INTERNAS
+                            //valores de voltaje de CD
+                            temporal_celda = "C" + (rango_anterior).ToString() + ":C" + (rango + rango_anterior - 1).ToString();
+                            rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("H40:H" + r.ToString())].Value2;
+                            //valores de corriente de CD
+                            temporal_celda = "E" + (rango_anterior).ToString() + ":E" + (rango + rango_anterior - 1).ToString();
+                            rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("I40:I" + r.ToString())].Value2;
+
+                            //valores de potencia CD
+                            temporal_celda = "O" + (rango_anterior).ToString() + ":O" + (rango + rango_anterior - 1).ToString();
+                            rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("L40:L" + r.ToString())].Value2;
+                            //valores de potencia CA-1
+                            temporal_celda = "Q" + (rango_anterior).ToString() + ":Q" + (rango + rango_anterior - 1).ToString();
+                            rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("J40:J" + r.ToString())].Value2;
+                            //valores de potencia CA-2
+                            temporal_celda = "S" + (rango_anterior).ToString() + ":S" + (rango + rango_anterior - 1).ToString();
+                            rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("K40:K" + r.ToString())].Value2;
+
+                        }
+
+                        //valores de voltaje de CA1
+                        temporal_celda = "G" + (rango_anterior).ToString() + ":G" + (rango + rango_anterior - 1).ToString();
+                        rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("D40:D" + r.ToString())].Value2;
+                        //valores de corriente de CA1
+                        temporal_celda = "I" + (rango_anterior).ToString() + ":I" + (rango + rango_anterior - 1).ToString();
+                        rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("E40:E" + r.ToString())].Value2;
+                        //valores de voltaje de CA2
+                        temporal_celda = "K" + (rango_anterior).ToString() + ":K" + (rango + rango_anterior - 1).ToString();
+                        rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("F40:F" + r.ToString())].Value2;
+                        //valores de corriente de CA2
+                        temporal_celda = "M" + (rango_anterior).ToString() + ":M" + (rango + rango_anterior - 1).ToString();
+                        rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("G40:G" + r.ToString())].Value2;
+
+
+                        _ = rt_s_tablas.UsedRange.Rows.Count;
+                        rango_anterior = rt_s_tablas.UsedRange.Rows.Count + 1;
+
+                        //cerrar excel usado para copiar datos
+                        ae_book.Close(false, oMissiong, oMissiong);
+                        archivo_excel.Workbooks.Close();
+
+                    }
+                    catch (Exception e)
+                    {
+
+                        MessageBox.Show("AE: " + e.ToString());
+                    }
+                }
+
+                archivo_excel.Quit();
                 try
                 {
-                    path_archivos_excel = path_temporal + array_string[i];
-                    //Abrir archivo de datos de soldadura
-                    ae_book = archivo_excel.Workbooks.Open(path_archivos_excel);
-                    Excel.Worksheet ae_sheet = (Excel.Worksheet)ae_book.Worksheets.Item[1];
-                    r = ae_sheet.UsedRange.Rows.Count;
-                    lblTemporal.Text = r.ToString();
-                    rango = r - 39;
-                    rt_s_tablas.Range["A5:Y" + (rango + rango_anterior)].Font.Size = 14;
 
-                    //valores de hora
-                    temporal_celda = "A" + (rango_anterior).ToString() + ":A" + (rango + rango_anterior - 1).ToString();
-                    rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("B40:B" + r.ToString())].Value2;
+                    //pasar datos de soldadura de un excel al excel del reporte
+                    //VALORES PROMEDIOS DE VOLTAJE Y CORRIENTES
+                    string celda_pca1, celda_pca2, celda_pcd;
+                    rango = rt_s_tablas.UsedRange.Rows.Count;
+                    //valores de voltaje de CD
+                    temporal_celda = "C" + rango.ToString();
+                    rt_s_tablas.Range[("C" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(C6:" + temporal_celda + ")";
+                    temporal_celda = "C" + (1 + rango).ToString();
+                    rt_sheet.Range["C20"].Value = "=Hoja2!" + temporal_celda;
+                    rt_sheet.Range["D20"].Value = "V";
+                    //valores de corriente de CD
+                    temporal_celda = "E" + rango.ToString();
+                    rt_s_tablas.Range[("E" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(E6:" + temporal_celda + ")";
+                    temporal_celda = "E" + (1 + rango).ToString();
+                    rt_sheet.Range["A20"].Value = "=Hoja2!" + temporal_celda;
+                    rt_sheet.Range["B20"].Value = "A";
+                    //valores de voltaje de CA1
+                    temporal_celda = "G" + rango.ToString();
+                    rt_s_tablas.Range[("G" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(G6:" + temporal_celda + ")";
+                    temporal_celda = "G" + (1 + rango).ToString();
+                    rt_sheet.Range["G20"].Value = "=Hoja2!" + temporal_celda;
+                    rt_sheet.Range["H20"].Value = "V";
+                    //valores de corriente de CA1
+                    temporal_celda = "I" + rango.ToString();
+                    rt_s_tablas.Range[("I" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(I6:" + temporal_celda + ")";
+                    temporal_celda = "I" + (1 + rango).ToString();
+                    rt_sheet.Range["E20"].Value = "=Hoja2!" + temporal_celda;
+                    rt_sheet.Range["F20"].Value = "A";
+                    //valores de voltaje de CA2
+                    temporal_celda = "K" + rango.ToString();
+                    rt_s_tablas.Range[("K" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(K6:" + temporal_celda + ")";
+                    temporal_celda = "K" + (1 + rango).ToString();
+                    rt_sheet.Range["K20"].Value = "=Hoja2!" + temporal_celda;
+                    rt_sheet.Range["L20"].Value = "V";
+                    //valores de corriente de CA2
+                    temporal_celda = "M" + rango.ToString();
+                    rt_s_tablas.Range[("M" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(M6:" + temporal_celda + ")";
+                    temporal_celda = "M" + (1 + rango).ToString();
+                    rt_sheet.Range["I20"].Value = "=Hoja2!" + temporal_celda;
+                    rt_sheet.Range["J20"].Value = "A";
+
+
+
+
                     if (maquina_reporte.Contains("EXTERNA"))
                     {
-                        //celdas pra reportes de externas incluye CA3
+                        //CELDAS PARA REPORTE DE EXTERNAS
                         //valores de voltaje de CA3
-                        temporal_celda = "O" + (rango_anterior).ToString() + ":O" + (rango + rango_anterior - 1).ToString();
-                        rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("H40:H" + r.ToString())].Value2; ;
+                        temporal_celda = "O" + rango.ToString();
+                        rt_s_tablas.Range[("O" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(O6:" + temporal_celda + ")";
+                        temporal_celda = "O" + (1 + rango).ToString();
+                        rt_sheet.Range["O20"].Value = "=Hoja2!" + temporal_celda;
+                        rt_sheet.Range["P20"].Value = "V";
                         //valores de corriente de CA3
-                        temporal_celda = "Q" + (rango_anterior).ToString() + ":Q" + (rango + rango_anterior - 1).ToString();
-                        rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("I40:I" + r.ToString())].Value2;
-                        //valores de voltaje de CD
-                        temporal_celda = "C" + (rango_anterior).ToString() + ":C" + (rango + rango_anterior - 1).ToString();
-                        rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("J40:J" + r.ToString())].Value2;
-                        //valores de corriente de CD
-                        temporal_celda = "E" + (rango_anterior).ToString() + ":E" + (rango + rango_anterior - 1).ToString();
-                        rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("K40:K" + r.ToString())].Value2;
+                        temporal_celda = "Q" + rango.ToString();
+                        rt_s_tablas.Range[("Q" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(Q6:" + temporal_celda + ")";
+                        temporal_celda = "Q" + (1 + rango).ToString();
+                        rt_sheet.Range["M20"].Value = "=Hoja2!" + temporal_celda;
+                        rt_sheet.Range["N20"].Value = "A";
+                        //valores de potencia CA-3
+                        temporal_celda = "Y" + rango.ToString();
+                        rt_s_tablas.Range[("Y" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(Y6:" + temporal_celda + ")";
+                        temporal_celda = "Y" + (1 + rango).ToString();
+                        rt_sheet.Range["M23"].Value = "=Hoja2!" + temporal_celda;
+                        rt_sheet.Range["N23"].Value = "kW";
 
                         //valores de potencia CD
-                        temporal_celda = "S" + (rango_anterior).ToString() + ":S" + (rango + rango_anterior - 1).ToString();
-                        rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("O40:O" + r.ToString())].Value2;
+                        temporal_celda = "S" + rango.ToString();
+                        rt_s_tablas.Range[("S" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(S6:" + temporal_celda + ")";
+                        temporal_celda = "S" + (1 + rango).ToString();
+                        rt_sheet.Range["A23"].Value = "=Hoja2!" + temporal_celda;
+                        rt_sheet.Range["B23"].Value = "kW";
                         //valores de potencia CA-1
-                        temporal_celda = "U" + (rango_anterior).ToString() + ":U" + (rango + rango_anterior - 1).ToString();
-                        rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("L40:L" + r.ToString())].Value2;
+                        temporal_celda = "U" + rango.ToString();
+                        rt_s_tablas.Range[("U" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(U6:" + temporal_celda + ")";
+                        temporal_celda = "U" + (1 + rango).ToString();
+                        rt_sheet.Range["E23"].Value = "=Hoja2!" + temporal_celda;
+                        rt_sheet.Range["F23"].Value = "kW";
                         //valores de potencia CA-2
-                        temporal_celda = "W" + (rango_anterior).ToString() + ":W" + (rango + rango_anterior - 1).ToString();
-                        rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("M40:M" + r.ToString())].Value2;
-                        //valores de potencia CA-3
-                        temporal_celda = "Y" + (rango_anterior).ToString() + ":Y" + (rango + rango_anterior - 1).ToString();
-                        rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("N40:N" + r.ToString())].Value2;
+                        temporal_celda = "W" + rango.ToString();
+                        rt_s_tablas.Range[("W" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(W6:" + temporal_celda + ")";
+                        temporal_celda = "W" + (1 + rango).ToString();
+                        rt_sheet.Range["I23"].Value = "=Hoja2!" + temporal_celda;
+                        rt_sheet.Range["J23"].Value = "kW";
 
+                        celda_pcd = "S";
+                        celda_pca1 = "U";
+                        celda_pca2 = "W";
                     }
                     else
                     {
-                        //CELDAS PARA REPORTE DE INTERNAS
-                        //valores de voltaje de CD
-                        temporal_celda = "C" + (rango_anterior).ToString() + ":C" + (rango + rango_anterior - 1).ToString();
-                        rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("H40:H" + r.ToString())].Value2;
-                        //valores de corriente de CD
-                        temporal_celda = "E" + (rango_anterior).ToString() + ":E" + (rango + rango_anterior - 1).ToString();
-                        rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("I40:I" + r.ToString())].Value2;
-
                         //valores de potencia CD
-                        temporal_celda = "O" + (rango_anterior).ToString() + ":O" + (rango + rango_anterior - 1).ToString();
-                        rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("L40:L" + r.ToString())].Value2;
+                        temporal_celda = "O" + rango.ToString();
+                        rt_s_tablas.Range[("O" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(O6:" + temporal_celda + ")";
+                        temporal_celda = "O" + (1 + rango).ToString();
+                        rt_sheet.Range["A23"].Value = "=Hoja2!" + temporal_celda;
+                        rt_sheet.Range["B23"].Value = "kW";
                         //valores de potencia CA-1
-                        temporal_celda = "Q" + (rango_anterior).ToString() + ":Q" + (rango + rango_anterior - 1).ToString();
-                        rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("J40:J" + r.ToString())].Value2;
+                        temporal_celda = "Q" + rango.ToString();
+                        rt_s_tablas.Range[("Q" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(Q6:" + temporal_celda + ")";
+                        temporal_celda = "Q" + (1 + rango).ToString();
+                        rt_sheet.Range["E23"].Value = "=Hoja2!" + temporal_celda;
+                        rt_sheet.Range["F23"].Value = "kW";
                         //valores de potencia CA-2
-                        temporal_celda = "S" + (rango_anterior).ToString() + ":S" + (rango + rango_anterior - 1).ToString();
-                        rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("K40:K" + r.ToString())].Value2;
+                        temporal_celda = "S" + rango.ToString();
+                        rt_s_tablas.Range[("S" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(S6:" + temporal_celda + ")";
+                        temporal_celda = "S" + (1 + rango).ToString();
+                        rt_sheet.Range["I23"].Value = "=Hoja2!" + temporal_celda;
+                        rt_sheet.Range["J23"].Value = "kW";
 
+                        celda_pcd = "O";
+                        celda_pca1 = "Q";
+                        celda_pca2 = "S";
                     }
 
-                    //valores de voltaje de CA1
-                    temporal_celda = "G" + (rango_anterior).ToString() + ":G" + (rango + rango_anterior - 1).ToString();
-                    rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("D40:D" + r.ToString())].Value2;
-                    //valores de corriente de CA1
-                    temporal_celda = "I" + (rango_anterior).ToString() + ":I" + (rango + rango_anterior - 1).ToString();
-                    rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("E40:E" + r.ToString())].Value2;
-                    //valores de voltaje de CA2
-                    temporal_celda = "K" + (rango_anterior).ToString() + ":K" + (rango + rango_anterior - 1).ToString();
-                    rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("F40:F" + r.ToString())].Value2;
-                    //valores de corriente de CA2
-                    temporal_celda = "M" + (rango_anterior).ToString() + ":M" + (rango + rango_anterior - 1).ToString();
-                    rt_s_tablas.Range[temporal_celda].Value = ae_sheet.Range[("G40:G" + r.ToString())].Value2;
 
+                    rango = rt_s_tablas.UsedRange.Rows.Count;
 
-                    _ = rt_s_tablas.UsedRange.Rows.Count;
-                    rango_anterior = rt_s_tablas.UsedRange.Rows.Count + 1;
+                    //----------------CREAR GRAFICAS--------------
+                    Excel.Chart chartpage = new Excel.Chart();
+                    Excel.ChartObjects objcharts;
+                    Excel.ChartObject mychart;
+                    Excel.Range chartrango;
+                    string temporal_celdas_origen, temporal_celdas_destino;
 
-                    //cerrar excel usado para copiar datos
-                    ae_book.Close(false, oMissiong, oMissiong);
-                    archivo_excel.Workbooks.Close();
+                    //GRAFICAS DE DE ARCO CD
+                    //GRAFICA DE VOLTAJE DE CD
+                    Excel.Worksheet grafica_dc = (Excel.Worksheet)rt_book.Worksheets.Add();
+                    grafica_dc.Name = "GRAF_DC";
 
-                }
-                catch (Exception e)
-                {
+                    grafica_dc.Range["F2"].Value = "GRAFICAS DE ARCO CD";
+                    grafica_dc.Range["F2"].Font.Size = 20;
+                    grafica_dc.Range["F2"].Font.Bold = true;
 
-                    MessageBox.Show("AE: " + e.ToString());
-                }
-            }
-
-            archivo_excel.Quit();
-
-
-
-            try
-            {
-
-                //pasar datos de soldadura de un excel al excel del reporte
-                //VALORES PROMEDIOS DE VOLTAJE Y CORRIENTES
-                string celda_pca1, celda_pca2, celda_pcd;
-                rango = rt_s_tablas.UsedRange.Rows.Count;
-                //valores de voltaje de CD
-                temporal_celda = "C" + rango.ToString();
-                rt_s_tablas.Range[("C" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(C6:" + temporal_celda + ")";
-                temporal_celda = "C" + (1 + rango).ToString();
-                rt_sheet.Range["C20"].Value = "=Hoja2!" + temporal_celda;
-                rt_sheet.Range["D20"].Value = "V";
-               //valores de corriente de CD
-               temporal_celda = "E" + rango.ToString();
-                rt_s_tablas.Range[("E" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(E6:" + temporal_celda + ")";
-                temporal_celda = "E" + (1 + rango).ToString();
-                rt_sheet.Range["A20"].Value = "=Hoja2!" + temporal_celda;
-                rt_sheet.Range["B20"].Value = "A";
-                //valores de voltaje de CA1
-                temporal_celda = "G" + rango.ToString();
-                rt_s_tablas.Range[("G" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(G6:" + temporal_celda + ")";
-                temporal_celda = "G" + (1 + rango).ToString();
-                rt_sheet.Range["G20"].Value = "=Hoja2!" + temporal_celda;
-                rt_sheet.Range["H20"].Value = "V";
-                //valores de corriente de CA1
-                temporal_celda = "I" + rango.ToString();
-                rt_s_tablas.Range[("I" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(I6:" + temporal_celda + ")";
-                temporal_celda = "I" + (1 + rango).ToString();
-                rt_sheet.Range["E20"].Value = "=Hoja2!" + temporal_celda;
-                rt_sheet.Range["F20"].Value = "A";
-                //valores de voltaje de CA2
-                temporal_celda = "K" + rango.ToString();
-                rt_s_tablas.Range[("K" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(K6:" + temporal_celda + ")";
-                temporal_celda = "K" + (1 + rango).ToString();
-                rt_sheet.Range["K20"].Value = "=Hoja2!" + temporal_celda;
-                rt_sheet.Range["L20"].Value = "V";
-                //valores de corriente de CA2
-                temporal_celda = "M" + rango.ToString();
-                rt_s_tablas.Range[("M" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(M6:" + temporal_celda + ")";
-                temporal_celda = "M" + (1 + rango).ToString();
-                rt_sheet.Range["I20"].Value = "=Hoja2!" + temporal_celda;
-                rt_sheet.Range["J20"].Value = "A";
-
-
-
-
-                if (maquina_reporte.Contains("EXTERNA"))
-                {
-                    //CELDAS PARA REPORTE DE EXTERNAS
-                    //valores de voltaje de CA3
-                    temporal_celda = "O" + rango.ToString();
-                    rt_s_tablas.Range[("O" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(O6:" + temporal_celda + ")";
-                    temporal_celda = "O" + (1 + rango).ToString();
-                    rt_sheet.Range["O20"].Value = "=Hoja2!" + temporal_celda;
-                    rt_sheet.Range["P20"].Value = "V";
-                    //valores de corriente de CA3
-                    temporal_celda = "Q" + rango.ToString();
-                    rt_s_tablas.Range[("Q" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(Q6:" + temporal_celda + ")";
-                    temporal_celda = "Q" + (1 + rango).ToString();
-                    rt_sheet.Range["M20"].Value = "=Hoja2!" + temporal_celda;
-                    rt_sheet.Range["N20"].Value = "A";
-                    //valores de potencia CA-3
-                    temporal_celda = "Y" + rango.ToString();
-                    rt_s_tablas.Range[("Y" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(Y6:" + temporal_celda + ")";
-                    temporal_celda = "Y" + (1 + rango).ToString();
-                    rt_sheet.Range["M23"].Value = "=Hoja2!" + temporal_celda;
-                    rt_sheet.Range["N23"].Value = "kW";
-
-                    //valores de potencia CD
-                    temporal_celda = "S" + rango.ToString();
-                    rt_s_tablas.Range[("S" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(S6:" + temporal_celda + ")";
-                    temporal_celda = "S" + (1 + rango).ToString();
-                    rt_sheet.Range["A23"].Value = "=Hoja2!" + temporal_celda;
-                    rt_sheet.Range["B23"].Value = "kW";
-                    //valores de potencia CA-1
-                    temporal_celda = "U" + rango.ToString();
-                    rt_s_tablas.Range[("U" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(U6:" + temporal_celda + ")";
-                    temporal_celda = "U" + (1 + rango).ToString();
-                    rt_sheet.Range["E23"].Value = "=Hoja2!" + temporal_celda;
-                    rt_sheet.Range["F23"].Value = "kW";
-                    //valores de potencia CA-2
-                    temporal_celda = "W" + rango.ToString();
-                    rt_s_tablas.Range[("W" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(W6:" + temporal_celda + ")";
-                    temporal_celda = "W" + (1 + rango).ToString();
-                    rt_sheet.Range["I23"].Value = "=Hoja2!" + temporal_celda;
-                    rt_sheet.Range["J23"].Value = "kW";
-
-                    celda_pcd = "S";
-                    celda_pca1 = "U";
-                    celda_pca2 = "W";
-                }
-                else
-                {
-                    //valores de potencia CD
-                    temporal_celda = "O" + rango.ToString();
-                    rt_s_tablas.Range[("O" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(O6:" + temporal_celda + ")";
-                    temporal_celda = "O" + (1 + rango).ToString();
-                    rt_sheet.Range["A23"].Value = "=Hoja2!" + temporal_celda;
-                    rt_sheet.Range["B23"].Value = "kW";
-                    //valores de potencia CA-1
-                    temporal_celda = "Q" + rango.ToString();
-                    rt_s_tablas.Range[("Q" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(Q6:" + temporal_celda + ")";
-                    temporal_celda = "Q" + (1 + rango).ToString();
-                    rt_sheet.Range["E23"].Value = "=Hoja2!" + temporal_celda;
-                    rt_sheet.Range["F23"].Value = "kW";
-                    //valores de potencia CA-2
-                    temporal_celda = "S" + rango.ToString();
-                    rt_s_tablas.Range[("S" + (1 + rango).ToString())].FormulaLocal = "=PROMEDIO(S6:" + temporal_celda + ")";
-                    temporal_celda = "S" + (1 + rango).ToString();
-                    rt_sheet.Range["I23"].Value = "=Hoja2!" + temporal_celda;
-                    rt_sheet.Range["J23"].Value = "kW";
-
-                    celda_pcd = "O";
-                    celda_pca1 = "Q";
-                    celda_pca2 = "S";
-                }
-
-
-                rango = rt_s_tablas.UsedRange.Rows.Count;
-
-                //----------------CREAR GRAFICAS--------------
-                Excel.Chart chartpage = new Excel.Chart();
-                Excel.ChartObjects objcharts;
-                Excel.ChartObject mychart;
-                Excel.Range chartrango;
-                string temporal_celdas_origen, temporal_celdas_destino;
-
-                //GRAFICAS DE DE ARCO CD
-                //GRAFICA DE VOLTAJE DE CD
-                Excel.Worksheet grafica_dc = (Excel.Worksheet)rt_book.Worksheets.Add();
-                grafica_dc.Name = "GRAF_DC";
-
-                grafica_dc.Range["F2"].Value = "GRAFICAS DE ARCO CD";
-                grafica_dc.Range["F2"].Font.Size = 20;
-                grafica_dc.Range["F2"].Font.Bold = true;
-
-                grafica_dc.Range["B5"].Value = "TABLA DE VALORES DE PARAMETROS";
-                grafica_dc.Range["B5"].Font.Size = 14;
-                grafica_dc.Range["B5"].Font.Bold = true;
-
-                //HORA
-                temporal_celdas_origen = "A5:" + "A" + rango.ToString();
-                temporal_celdas_destino = "B7" + ":B" + (rango + 2).ToString();
-                grafica_dc.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
-                grafica_dc.Range[temporal_celdas_destino].NumberFormat = "hh:mm:ss AM/PM";
-                //VALORES DE VOLTAJE CD
-                temporal_celdas_origen = "C5:" + "C" + rango.ToString();
-                temporal_celdas_destino = "C7" + ":C" + (rango + 2).ToString();
-                grafica_dc.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
-                //VALORES DE CORRIENTE CD
-                temporal_celdas_origen = "E5:" + "E" + rango.ToString();
-                temporal_celdas_destino = "D7" + ":D" + (rango + 2).ToString();
-                grafica_dc.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
-                //VALORES DE POTENCIA CD
-                temporal_celdas_origen = celda_pcd + "5:" + celda_pcd + rango.ToString();
-                temporal_celdas_destino = "E7" + ":E" + (rango + 2).ToString();
-                grafica_dc.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
-
-                grafica_dc.Range["A5:E" + (rango + 2).ToString()].Font.Size = 14;
-                grafica_dc.Range["A5:E" + (rango + 2).ToString()].Font.Bold = true;
-
-                //GRAFICA DE VOLTAJE DE CD
-                grafica_dc.Range["G5"].Value = "GRAFICA DE VOLTAJE CD";
-                grafica_dc.Range["G5"].Font.Size = 14;
-                grafica_dc.Range["G5"].Font.Bold = true;
-
-                objcharts = grafica_dc.ChartObjects();
-                mychart = objcharts.Add(rt_sheet.Range["H6"].Left, rt_sheet.Range["H6"].Top, 945, 430);
-                chartpage = mychart.Chart;
-                chartrango = grafica_dc.Range["B8:" + "B" + (rango + 2).ToString() + ",C8:" + "C" + (rango + 2).ToString()];
-                chartpage.SetSourceData(chartrango);
-                chartpage.ChartType = Excel.XlChartType.xlLine;
-                chartpage.ChartStyle = 3;
-                chartpage.HasLegend=false;
-                chartpage.HasTitle = false;
-
-                //GRAFICA DE CORRIENTE DE CD
-                grafica_dc.Range["G32"].Value = "GRAFICA DE CORRIENTE CD";
-                grafica_dc.Range["G32"].Font.Size = 14;
-                grafica_dc.Range["G32"].Font.Bold = true;
-
-                objcharts = grafica_dc.ChartObjects();
-                mychart = objcharts.Add(rt_sheet.Range["H33"].Left, rt_sheet.Range["H33"].Top, 945, 430);
-                chartpage = mychart.Chart;
-                chartrango = grafica_dc.Range["B8:" + "B" + (rango + 2).ToString() + ",D8:" + "D" + (rango + 2).ToString()];
-                chartpage.SetSourceData(chartrango);
-                chartpage.ChartType = Excel.XlChartType.xlLine;
-                chartpage.ChartStyle = 4;
-                chartpage.HasLegend = false;
-                chartpage.HasTitle = false;
-
-                //GRAFICA DE POTENCIA DE CD
-                grafica_dc.Range["G60"].Value = "GRAFICA DE POTENCIA CD";
-                grafica_dc.Range["G60"].Font.Size = 14;
-                grafica_dc.Range["G60"].Font.Bold = true;
-
-                objcharts = grafica_dc.ChartObjects();
-                mychart = objcharts.Add(rt_sheet.Range["H67"].Left, rt_sheet.Range["H67"].Top, 945, 430);
-                chartpage = mychart.Chart;
-                chartrango = grafica_dc.Range["B8:" + "B" + (rango + 2).ToString() + ",E8:" + "E" + (rango + 2).ToString()];
-                chartpage.SetSourceData(chartrango);
-                chartpage.ChartType = Excel.XlChartType.xlLine;
-                chartpage.ChartStyle = 4;
-                chartpage.HasLegend = false;
-                chartpage.HasTitle = false;
-
-                //GRAFICAS DE DE ARCO CA1*********************
-                //GRAFICA DE VOLTAJE DE CA1
-                Excel.Worksheet grafica_ac1 = (Excel.Worksheet)rt_book.Worksheets.Add();
-                grafica_ac1.Name = "GRAF_CA1";
-
-                grafica_ac1.Range["F2"].Value = "GRAFICAS DE ARCO CA1";
-                grafica_ac1.Range["F2"].Font.Size = 20;
-                grafica_ac1.Range["F2"].Font.Bold = true;
-
-                grafica_ac1.Range["B5"].Value = "TABLA DE VALORES DE PARAMETROS";
-                grafica_ac1.Range["B5"].Font.Size = 14;
-                grafica_ac1.Range["B5"].Font.Bold = true;
-
-
-                //HORA
-                temporal_celdas_origen = "A5:" + "A" + rango.ToString();
-                temporal_celdas_destino = "B7" + ":B" + (rango + 2).ToString();
-                grafica_ac1.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
-                grafica_ac1.Range[temporal_celdas_destino].NumberFormat = "hh:mm:ss AM/PM";
-                //VALORES DE VOLTAJE CA1
-                temporal_celdas_origen = "G5:" + "G" + rango.ToString();
-                temporal_celdas_destino = "C7" + ":C" + (rango + 2).ToString();
-                grafica_ac1.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
-                //VALORES DE CORRIENTE CA1
-                temporal_celdas_origen = "I5:" + "I" + rango.ToString();
-                temporal_celdas_destino = "D7" + ":D" + (rango + 2).ToString();
-                grafica_ac1.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
-                //VALORES DE POTENCIA CA1
-                temporal_celdas_origen = celda_pca1 + "5:" + celda_pca1 + rango.ToString();
-                temporal_celdas_destino = "E7" + ":E" + (rango + 2).ToString();
-                grafica_ac1.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
-
-                grafica_ac1.Range["A5:E" + (rango + 2).ToString()].Font.Size = 14;
-                grafica_ac1.Range["A5:E" + (rango + 2).ToString()].Font.Bold = true;
-
-                //GRAFICA DE VOLTAJE DE CA1
-                grafica_ac1.Range["G5"].Value = "GRAFICA DE VOLTAJE CD";
-                grafica_ac1.Range["G5"].Font.Size = 14;
-                grafica_ac1.Range["G5"].Font.Bold = true;
-
-                objcharts = grafica_ac1.ChartObjects();
-                mychart = objcharts.Add(rt_sheet.Range["H6"].Left, rt_sheet.Range["H7"].Top, 945, 430);
-                chartpage = mychart.Chart;
-                chartrango = grafica_ac1.Range["B8:" + "B" + (rango + 2).ToString() + ",C8:" + "C" + (rango + 2).ToString()];
-                chartpage.SetSourceData(chartrango);
-                chartpage.ChartType = Excel.XlChartType.xlLine;
-                chartpage.ChartStyle = 3;
-                chartpage.HasLegend = false;
-                chartpage.HasTitle = false;
-
-                //GRAFICA DE CORRIENTE DE CA1
-                grafica_ac1.Range["G32"].Value = "GRAFICA DE CORRIENTE CA1";
-                grafica_ac1.Range["G32"].Font.Size = 14;
-                grafica_ac1.Range["G32"].Font.Bold = true;
-
-                objcharts = grafica_ac1.ChartObjects();
-                mychart = objcharts.Add(rt_sheet.Range["H33"].Left, rt_sheet.Range["H33"].Top, 945, 430);
-                chartpage = mychart.Chart;
-                chartrango = grafica_ac1.Range["B8:" + "B" + (rango + 2).ToString() + ",D8:" + "D" + (rango + 2).ToString()];
-                chartpage.SetSourceData(chartrango);
-                chartpage.ChartType = Excel.XlChartType.xlLine;
-                chartpage.ChartStyle = 4;
-                chartpage.HasLegend = false;
-                chartpage.HasTitle = false;
-
-                //GRAFICA DE POTENCIA DE CA1
-                grafica_ac1.Range["G60"].Value = "GRAFICA DE POTENCIA CA1";
-                grafica_ac1.Range["G60"].Font.Size = 14;
-                grafica_ac1.Range["G60"].Font.Bold = true;
-
-                objcharts = grafica_ac1.ChartObjects();
-                mychart = objcharts.Add(rt_sheet.Range["H67"].Left, rt_sheet.Range["H67"].Top, 945, 430);
-                chartpage = mychart.Chart;
-                chartrango = grafica_ac1.Range["B8:" + "B" + (rango + 2).ToString() + ",E8:" + "E" + (rango + 2).ToString()];
-                chartpage.SetSourceData(chartrango);
-                chartpage.ChartType = Excel.XlChartType.xlLine;
-                chartpage.ChartStyle = 4;
-                chartpage.HasLegend = false;
-                chartpage.HasTitle = false;
-
-                //GRAFICAS DE DE ARCO CA2
-                //GRAFICA DE VOLTAJE DE CA2
-                Excel.Worksheet grafica_ac2 = (Excel.Worksheet)rt_book.Worksheets.Add();
-                grafica_ac2.Name = "GRAF_CA2";
-
-                grafica_ac2.Range["F2"].Value = "GRAFICAS DE ARCO CA2";
-                grafica_ac2.Range["F2"].Font.Size = 20;
-                grafica_ac2.Range["F2"].Font.Bold = true;
-
-                grafica_ac2.Range["B5"].Value = "TABLA DE VALORES DE PARAMETROS";
-                grafica_ac2.Range["B5"].Font.Size = 14;
-                grafica_ac2.Range["B5"].Font.Bold = true;
-
-                //HORA
-                temporal_celdas_origen = "A5:" + "A" + rango.ToString();
-                temporal_celdas_destino = "B7" + ":B" + (rango + 2).ToString();
-                grafica_ac2.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
-                grafica_ac2.Range[temporal_celdas_destino].NumberFormat = "hh:mm:ss AM/PM";
-                //VALORES DE VOLTAJE CA2
-                temporal_celdas_origen = "K5:" + "K" + rango.ToString();
-                temporal_celdas_destino = "C7" + ":C" + (rango + 2).ToString();
-                grafica_ac2.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
-                //VALORES DE CORRIENTE CA2
-                temporal_celdas_origen = "M5:" + "M" + rango.ToString();
-                temporal_celdas_destino = "D7" + ":D" + (rango + 2).ToString();
-                grafica_ac2.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
-                //VALORES DE POTENCIA CA2
-                temporal_celdas_origen = celda_pca2 + "5:" + celda_pca2 + rango.ToString();
-                temporal_celdas_destino = "E7" + ":E" + (rango + 2).ToString();
-                grafica_ac2.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
-
-                grafica_ac2.Range["A5:E" + (rango + 2).ToString()].Font.Size = 14;
-                grafica_ac2.Range["A5:E" + (rango + 2).ToString()].Font.Bold = true;
-
-                //GRAFICA DE VOLTAJE DE CA2
-                grafica_ac2.Range["G5"].Value = "GRAFICA DE VOLTAJE CA2";
-                grafica_ac2.Range["G5"].Font.Size = 14;
-                grafica_ac2.Range["G5"].Font.Bold = true;
-
-                objcharts = grafica_ac2.ChartObjects();
-                mychart = objcharts.Add(rt_sheet.Range["H7"].Left, rt_sheet.Range["H7"].Top, 945, 430);
-                chartpage = mychart.Chart;
-                chartrango = grafica_ac2.Range["B8:" + "B" + (rango + 2).ToString() + ",C8:" + "C" + (rango + 2).ToString()];
-                chartpage.SetSourceData(chartrango);
-                chartpage.ChartType = Excel.XlChartType.xlLine;
-                chartpage.ChartStyle = 3;
-                chartpage.HasLegend = false;
-                chartpage.HasTitle = false;
-
-                //GRAFICA DE CORRIENTE DE CA2
-                grafica_ac2.Range["G32"].Value = "GRAFICA DE CORRIENTE CA2";
-                grafica_ac2.Range["G32"].Font.Size = 14;
-                grafica_ac2.Range["G32"].Font.Bold = true;
-
-                objcharts = grafica_ac2.ChartObjects();
-                mychart = objcharts.Add(rt_sheet.Range["H33"].Left, rt_sheet.Range["H34"].Top, 945, 430);
-                chartpage = mychart.Chart;
-                chartrango = grafica_ac2.Range["B8:" + "B" + (rango + 2).ToString() + ",D8:" + "D" + (rango + 2).ToString()];
-                chartpage.SetSourceData(chartrango);
-                chartpage.ChartType = Excel.XlChartType.xlLine;
-                chartpage.ChartStyle = 4;
-                chartpage.HasLegend = false;
-                chartpage.HasTitle = false;
-
-                //GRAFICA DE POTENCIA DE CA2
-                grafica_ac2.Range["G60"].Value = "GRAFICA DE POTENCIA CA2";
-                grafica_ac2.Range["G60"].Font.Size = 14;
-                grafica_ac2.Range["G60"].Font.Bold = true;
-
-                objcharts = grafica_ac2.ChartObjects();
-                mychart = objcharts.Add(rt_sheet.Range["H67"].Left, rt_sheet.Range["H67"].Top, 945, 430);
-                chartpage = mychart.Chart;
-                chartrango = grafica_ac2.Range["B8:" + "B" + (rango + 2).ToString() + ",E8:" + "E" + (rango + 2).ToString()];
-                chartpage.SetSourceData(chartrango);
-                chartpage.ChartType = Excel.XlChartType.xlLine;
-                chartpage.ChartStyle = 4;
-                chartpage.HasLegend = false;
-                chartpage.HasTitle = false;
-
-                if (maquina_reporte.Contains("EXTERNA"))
-                {
-                    //GRAFICAS DE DE ARCO CA3
-                    //GRAFICA DE VOLTAJE DE CA3
-                    Excel.Worksheet grafica_ac3 = (Excel.Worksheet)rt_book.Worksheets.Add();
-                    grafica_ac3.Name = "GRAF_CA3";
-
-                    grafica_ac3.Range["F2"].Value = "GRAFICAS DE ARCO CA3";
-                    grafica_ac3.Range["F2"].Font.Size = 20;
-                    grafica_ac3.Range["F2"].Font.Bold = true;
-
-                    grafica_ac3.Range["B5"].Value = "TABLA DE VALORES DE PARAMETROS";
-                    grafica_ac3.Range["B5"].Font.Size = 14;
-                    grafica_ac3.Range["B5"].Font.Bold = true;
+                    grafica_dc.Range["B5"].Value = "TABLA DE VALORES DE PARAMETROS";
+                    grafica_dc.Range["B5"].Font.Size = 14;
+                    grafica_dc.Range["B5"].Font.Bold = true;
 
                     //HORA
                     temporal_celdas_origen = "A5:" + "A" + rango.ToString();
                     temporal_celdas_destino = "B7" + ":B" + (rango + 2).ToString();
-                    grafica_ac3.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
-                    grafica_ac3.Range[temporal_celdas_destino].NumberFormat = "hh:mm:ss AM/PM";
-                    //VALORES DE VOLTAJE CA3
-                    temporal_celdas_origen = "O5:" + "O" + rango.ToString();
+                    grafica_dc.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
+                    grafica_dc.Range[temporal_celdas_destino].NumberFormat = "hh:mm:ss AM/PM";
+                    //VALORES DE VOLTAJE CD
+                    temporal_celdas_origen = "C5:" + "C" + rango.ToString();
                     temporal_celdas_destino = "C7" + ":C" + (rango + 2).ToString();
-                    grafica_ac3.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
-                    //VALORES DE CORRIENTE CA3
-                    temporal_celdas_origen = "Q5:" + "Q" + rango.ToString();
+                    grafica_dc.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
+                    //VALORES DE CORRIENTE CD
+                    temporal_celdas_origen = "E5:" + "E" + rango.ToString();
                     temporal_celdas_destino = "D7" + ":D" + (rango + 2).ToString();
-                    grafica_ac3.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
-                    //VALORES DE POTENCIA CA3
-                    temporal_celdas_origen = "W5:" + "W" + rango.ToString();
+                    grafica_dc.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
+                    //VALORES DE POTENCIA CD
+                    temporal_celdas_origen = celda_pcd + "5:" + celda_pcd + rango.ToString();
                     temporal_celdas_destino = "E7" + ":E" + (rango + 2).ToString();
-                    grafica_ac3.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
+                    grafica_dc.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
 
-                    grafica_ac3.Range["A5:E" + (rango + 2).ToString()].Font.Size = 14;
-                    grafica_ac3.Range["A5:E" + (rango + 2).ToString()].Font.Bold = true;
+                    grafica_dc.Range["A5:E" + (rango + 2).ToString()].Font.Size = 14;
+                    grafica_dc.Range["A5:E" + (rango + 2).ToString()].Font.Bold = true;
 
-                    //GRAFICA DE VOLTAJE DE CA3
-                    grafica_ac3.Range["G5"].Value = "GRAFICA DE VOLTAJE CA3";
-                    grafica_ac3.Range["G5"].Font.Size = 14;
-                    grafica_ac3.Range["G5"].Font.Bold = true;
+                    //GRAFICA DE VOLTAJE DE CD
+                    grafica_dc.Range["G5"].Value = "GRAFICA DE VOLTAJE CD";
+                    grafica_dc.Range["G5"].Font.Size = 14;
+                    grafica_dc.Range["G5"].Font.Bold = true;
 
-                    objcharts = grafica_ac3.ChartObjects();
-                    mychart = objcharts.Add(rt_sheet.Range["H7"].Left, rt_sheet.Range["H7"].Top, 945, 430);
+                    objcharts = grafica_dc.ChartObjects();
+                    mychart = objcharts.Add(rt_sheet.Range["H6"].Left, rt_sheet.Range["H6"].Top, 945, 430);
                     chartpage = mychart.Chart;
-                    chartrango = grafica_ac3.Range["B8:" + "B" + (rango + 2).ToString() + ",C8:" + "C" + (rango + 2).ToString()];
+                    chartrango = grafica_dc.Range["B8:" + "B" + (rango + 2).ToString() + ",C8:" + "C" + (rango + 2).ToString()];
                     chartpage.SetSourceData(chartrango);
                     chartpage.ChartType = Excel.XlChartType.xlLine;
                     chartpage.ChartStyle = 3;
                     chartpage.HasLegend = false;
                     chartpage.HasTitle = false;
 
-                    //GRAFICA DE CORRIENTE DE CA3
-                    grafica_ac3.Range["G32"].Value = "GRAFICA DE CORRIENTE CA3";
-                    grafica_ac3.Range["G32"].Font.Size = 14;
-                    grafica_ac3.Range["G32"].Font.Bold = true;
+                    //GRAFICA DE CORRIENTE DE CD
+                    grafica_dc.Range["G32"].Value = "GRAFICA DE CORRIENTE CD";
+                    grafica_dc.Range["G32"].Font.Size = 14;
+                    grafica_dc.Range["G32"].Font.Bold = true;
 
-                    objcharts = grafica_ac3.ChartObjects();
-                    mychart = objcharts.Add(rt_sheet.Range["H33"].Left, rt_sheet.Range["H34"].Top, 945, 430);
+                    objcharts = grafica_dc.ChartObjects();
+                    mychart = objcharts.Add(rt_sheet.Range["H33"].Left, rt_sheet.Range["H33"].Top, 945, 430);
                     chartpage = mychart.Chart;
-                    chartrango = grafica_ac3.Range["B8:" + "B" + (rango + 2).ToString() + ",D8:" + "D" + (rango + 2).ToString()];
+                    chartrango = grafica_dc.Range["B8:" + "B" + (rango + 2).ToString() + ",D8:" + "D" + (rango + 2).ToString()];
                     chartpage.SetSourceData(chartrango);
                     chartpage.ChartType = Excel.XlChartType.xlLine;
                     chartpage.ChartStyle = 4;
                     chartpage.HasLegend = false;
                     chartpage.HasTitle = false;
 
-                    //GRAFICA DE POTENCIA DE CA3
-                    grafica_ac3.Range["G60"].Value = "GRAFICA DE POTENCIA CA3";
-                    grafica_ac3.Range["G60"].Font.Size = 14;
-                    grafica_ac3.Range["G60"].Font.Bold = true;
+                    //GRAFICA DE POTENCIA DE CD
+                    grafica_dc.Range["G60"].Value = "GRAFICA DE POTENCIA CD";
+                    grafica_dc.Range["G60"].Font.Size = 14;
+                    grafica_dc.Range["G60"].Font.Bold = true;
 
-                    objcharts = grafica_ac3.ChartObjects();
+                    objcharts = grafica_dc.ChartObjects();
                     mychart = objcharts.Add(rt_sheet.Range["H67"].Left, rt_sheet.Range["H67"].Top, 945, 430);
                     chartpage = mychart.Chart;
-                    chartrango = grafica_ac3.Range["B8:" + "B" + (rango + 2).ToString() + ",E8:" + "E" + (rango + 2).ToString()];
+                    chartrango = grafica_dc.Range["B8:" + "B" + (rango + 2).ToString() + ",E8:" + "E" + (rango + 2).ToString()];
                     chartpage.SetSourceData(chartrango);
                     chartpage.ChartType = Excel.XlChartType.xlLine;
                     chartpage.ChartStyle = 4;
                     chartpage.HasLegend = false;
                     chartpage.HasTitle = false;
 
+                    //GRAFICAS DE DE ARCO CA1*********************
+                    //GRAFICA DE VOLTAJE DE CA1
+                    Excel.Worksheet grafica_ac1 = (Excel.Worksheet)rt_book.Worksheets.Add();
+                    grafica_ac1.Name = "GRAF_CA1";
+
+                    grafica_ac1.Range["F2"].Value = "GRAFICAS DE ARCO CA1";
+                    grafica_ac1.Range["F2"].Font.Size = 20;
+                    grafica_ac1.Range["F2"].Font.Bold = true;
+
+                    grafica_ac1.Range["B5"].Value = "TABLA DE VALORES DE PARAMETROS";
+                    grafica_ac1.Range["B5"].Font.Size = 14;
+                    grafica_ac1.Range["B5"].Font.Bold = true;
+
+
+                    //HORA
+                    temporal_celdas_origen = "A5:" + "A" + rango.ToString();
+                    temporal_celdas_destino = "B7" + ":B" + (rango + 2).ToString();
+                    grafica_ac1.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
+                    grafica_ac1.Range[temporal_celdas_destino].NumberFormat = "hh:mm:ss AM/PM";
+                    //VALORES DE VOLTAJE CA1
+                    temporal_celdas_origen = "G5:" + "G" + rango.ToString();
+                    temporal_celdas_destino = "C7" + ":C" + (rango + 2).ToString();
+                    grafica_ac1.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
+                    //VALORES DE CORRIENTE CA1
+                    temporal_celdas_origen = "I5:" + "I" + rango.ToString();
+                    temporal_celdas_destino = "D7" + ":D" + (rango + 2).ToString();
+                    grafica_ac1.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
+                    //VALORES DE POTENCIA CA1
+                    temporal_celdas_origen = celda_pca1 + "5:" + celda_pca1 + rango.ToString();
+                    temporal_celdas_destino = "E7" + ":E" + (rango + 2).ToString();
+                    grafica_ac1.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
+
+                    grafica_ac1.Range["A5:E" + (rango + 2).ToString()].Font.Size = 14;
+                    grafica_ac1.Range["A5:E" + (rango + 2).ToString()].Font.Bold = true;
+
+                    //GRAFICA DE VOLTAJE DE CA1
+                    grafica_ac1.Range["G5"].Value = "GRAFICA DE VOLTAJE CD";
+                    grafica_ac1.Range["G5"].Font.Size = 14;
+                    grafica_ac1.Range["G5"].Font.Bold = true;
+
+                    objcharts = grafica_ac1.ChartObjects();
+                    mychart = objcharts.Add(rt_sheet.Range["H6"].Left, rt_sheet.Range["H7"].Top, 945, 430);
+                    chartpage = mychart.Chart;
+                    chartrango = grafica_ac1.Range["B8:" + "B" + (rango + 2).ToString() + ",C8:" + "C" + (rango + 2).ToString()];
+                    chartpage.SetSourceData(chartrango);
+                    chartpage.ChartType = Excel.XlChartType.xlLine;
+                    chartpage.ChartStyle = 3;
+                    chartpage.HasLegend = false;
+                    chartpage.HasTitle = false;
+
+                    //GRAFICA DE CORRIENTE DE CA1
+                    grafica_ac1.Range["G32"].Value = "GRAFICA DE CORRIENTE CA1";
+                    grafica_ac1.Range["G32"].Font.Size = 14;
+                    grafica_ac1.Range["G32"].Font.Bold = true;
+
+                    objcharts = grafica_ac1.ChartObjects();
+                    mychart = objcharts.Add(rt_sheet.Range["H33"].Left, rt_sheet.Range["H33"].Top, 945, 430);
+                    chartpage = mychart.Chart;
+                    chartrango = grafica_ac1.Range["B8:" + "B" + (rango + 2).ToString() + ",D8:" + "D" + (rango + 2).ToString()];
+                    chartpage.SetSourceData(chartrango);
+                    chartpage.ChartType = Excel.XlChartType.xlLine;
+                    chartpage.ChartStyle = 4;
+                    chartpage.HasLegend = false;
+                    chartpage.HasTitle = false;
+
+                    //GRAFICA DE POTENCIA DE CA1
+                    grafica_ac1.Range["G60"].Value = "GRAFICA DE POTENCIA CA1";
+                    grafica_ac1.Range["G60"].Font.Size = 14;
+                    grafica_ac1.Range["G60"].Font.Bold = true;
+
+                    objcharts = grafica_ac1.ChartObjects();
+                    mychart = objcharts.Add(rt_sheet.Range["H67"].Left, rt_sheet.Range["H67"].Top, 945, 430);
+                    chartpage = mychart.Chart;
+                    chartrango = grafica_ac1.Range["B8:" + "B" + (rango + 2).ToString() + ",E8:" + "E" + (rango + 2).ToString()];
+                    chartpage.SetSourceData(chartrango);
+                    chartpage.ChartType = Excel.XlChartType.xlLine;
+                    chartpage.ChartStyle = 4;
+                    chartpage.HasLegend = false;
+                    chartpage.HasTitle = false;
+
+                    //GRAFICAS DE DE ARCO CA2
+                    //GRAFICA DE VOLTAJE DE CA2
+                    Excel.Worksheet grafica_ac2 = (Excel.Worksheet)rt_book.Worksheets.Add();
+                    grafica_ac2.Name = "GRAF_CA2";
+
+                    grafica_ac2.Range["F2"].Value = "GRAFICAS DE ARCO CA2";
+                    grafica_ac2.Range["F2"].Font.Size = 20;
+                    grafica_ac2.Range["F2"].Font.Bold = true;
+
+                    grafica_ac2.Range["B5"].Value = "TABLA DE VALORES DE PARAMETROS";
+                    grafica_ac2.Range["B5"].Font.Size = 14;
+                    grafica_ac2.Range["B5"].Font.Bold = true;
+
+                    //HORA
+                    temporal_celdas_origen = "A5:" + "A" + rango.ToString();
+                    temporal_celdas_destino = "B7" + ":B" + (rango + 2).ToString();
+                    grafica_ac2.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
+                    grafica_ac2.Range[temporal_celdas_destino].NumberFormat = "hh:mm:ss AM/PM";
+                    //VALORES DE VOLTAJE CA2
+                    temporal_celdas_origen = "K5:" + "K" + rango.ToString();
+                    temporal_celdas_destino = "C7" + ":C" + (rango + 2).ToString();
+                    grafica_ac2.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
+                    //VALORES DE CORRIENTE CA2
+                    temporal_celdas_origen = "M5:" + "M" + rango.ToString();
+                    temporal_celdas_destino = "D7" + ":D" + (rango + 2).ToString();
+                    grafica_ac2.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
+                    //VALORES DE POTENCIA CA2
+                    temporal_celdas_origen = celda_pca2 + "5:" + celda_pca2 + rango.ToString();
+                    temporal_celdas_destino = "E7" + ":E" + (rango + 2).ToString();
+                    grafica_ac2.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
+
+                    grafica_ac2.Range["A5:E" + (rango + 2).ToString()].Font.Size = 14;
+                    grafica_ac2.Range["A5:E" + (rango + 2).ToString()].Font.Bold = true;
+
+                    //GRAFICA DE VOLTAJE DE CA2
+                    grafica_ac2.Range["G5"].Value = "GRAFICA DE VOLTAJE CA2";
+                    grafica_ac2.Range["G5"].Font.Size = 14;
+                    grafica_ac2.Range["G5"].Font.Bold = true;
+
+                    objcharts = grafica_ac2.ChartObjects();
+                    mychart = objcharts.Add(rt_sheet.Range["H7"].Left, rt_sheet.Range["H7"].Top, 945, 430);
+                    chartpage = mychart.Chart;
+                    chartrango = grafica_ac2.Range["B8:" + "B" + (rango + 2).ToString() + ",C8:" + "C" + (rango + 2).ToString()];
+                    chartpage.SetSourceData(chartrango);
+                    chartpage.ChartType = Excel.XlChartType.xlLine;
+                    chartpage.ChartStyle = 3;
+                    chartpage.HasLegend = false;
+                    chartpage.HasTitle = false;
+
+                    //GRAFICA DE CORRIENTE DE CA2
+                    grafica_ac2.Range["G32"].Value = "GRAFICA DE CORRIENTE CA2";
+                    grafica_ac2.Range["G32"].Font.Size = 14;
+                    grafica_ac2.Range["G32"].Font.Bold = true;
+
+                    objcharts = grafica_ac2.ChartObjects();
+                    mychart = objcharts.Add(rt_sheet.Range["H33"].Left, rt_sheet.Range["H34"].Top, 945, 430);
+                    chartpage = mychart.Chart;
+                    chartrango = grafica_ac2.Range["B8:" + "B" + (rango + 2).ToString() + ",D8:" + "D" + (rango + 2).ToString()];
+                    chartpage.SetSourceData(chartrango);
+                    chartpage.ChartType = Excel.XlChartType.xlLine;
+                    chartpage.ChartStyle = 4;
+                    chartpage.HasLegend = false;
+                    chartpage.HasTitle = false;
+
+                    //GRAFICA DE POTENCIA DE CA2
+                    grafica_ac2.Range["G60"].Value = "GRAFICA DE POTENCIA CA2";
+                    grafica_ac2.Range["G60"].Font.Size = 14;
+                    grafica_ac2.Range["G60"].Font.Bold = true;
+
+                    objcharts = grafica_ac2.ChartObjects();
+                    mychart = objcharts.Add(rt_sheet.Range["H67"].Left, rt_sheet.Range["H67"].Top, 945, 430);
+                    chartpage = mychart.Chart;
+                    chartrango = grafica_ac2.Range["B8:" + "B" + (rango + 2).ToString() + ",E8:" + "E" + (rango + 2).ToString()];
+                    chartpage.SetSourceData(chartrango);
+                    chartpage.ChartType = Excel.XlChartType.xlLine;
+                    chartpage.ChartStyle = 4;
+                    chartpage.HasLegend = false;
+                    chartpage.HasTitle = false;
+
+                    if (maquina_reporte.Contains("EXTERNA"))
+                    {
+                        //GRAFICAS DE DE ARCO CA3
+                        //GRAFICA DE VOLTAJE DE CA3
+                        Excel.Worksheet grafica_ac3 = (Excel.Worksheet)rt_book.Worksheets.Add();
+                        grafica_ac3.Name = "GRAF_CA3";
+
+                        grafica_ac3.Range["F2"].Value = "GRAFICAS DE ARCO CA3";
+                        grafica_ac3.Range["F2"].Font.Size = 20;
+                        grafica_ac3.Range["F2"].Font.Bold = true;
+
+                        grafica_ac3.Range["B5"].Value = "TABLA DE VALORES DE PARAMETROS";
+                        grafica_ac3.Range["B5"].Font.Size = 14;
+                        grafica_ac3.Range["B5"].Font.Bold = true;
+
+                        //HORA
+                        temporal_celdas_origen = "A5:" + "A" + rango.ToString();
+                        temporal_celdas_destino = "B7" + ":B" + (rango + 2).ToString();
+                        grafica_ac3.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
+                        grafica_ac3.Range[temporal_celdas_destino].NumberFormat = "hh:mm:ss AM/PM";
+                        //VALORES DE VOLTAJE CA3
+                        temporal_celdas_origen = "O5:" + "O" + rango.ToString();
+                        temporal_celdas_destino = "C7" + ":C" + (rango + 2).ToString();
+                        grafica_ac3.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
+                        //VALORES DE CORRIENTE CA3
+                        temporal_celdas_origen = "Q5:" + "Q" + rango.ToString();
+                        temporal_celdas_destino = "D7" + ":D" + (rango + 2).ToString();
+                        grafica_ac3.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
+                        //VALORES DE POTENCIA CA3
+                        temporal_celdas_origen = "W5:" + "W" + rango.ToString();
+                        temporal_celdas_destino = "E7" + ":E" + (rango + 2).ToString();
+                        grafica_ac3.Range[temporal_celdas_destino].Value = rt_s_tablas.Range[temporal_celdas_origen].Value2;
+
+                        grafica_ac3.Range["A5:E" + (rango + 2).ToString()].Font.Size = 14;
+                        grafica_ac3.Range["A5:E" + (rango + 2).ToString()].Font.Bold = true;
+
+                        //GRAFICA DE VOLTAJE DE CA3
+                        grafica_ac3.Range["G5"].Value = "GRAFICA DE VOLTAJE CA3";
+                        grafica_ac3.Range["G5"].Font.Size = 14;
+                        grafica_ac3.Range["G5"].Font.Bold = true;
+
+                        objcharts = grafica_ac3.ChartObjects();
+                        mychart = objcharts.Add(rt_sheet.Range["H7"].Left, rt_sheet.Range["H7"].Top, 945, 430);
+                        chartpage = mychart.Chart;
+                        chartrango = grafica_ac3.Range["B8:" + "B" + (rango + 2).ToString() + ",C8:" + "C" + (rango + 2).ToString()];
+                        chartpage.SetSourceData(chartrango);
+                        chartpage.ChartType = Excel.XlChartType.xlLine;
+                        chartpage.ChartStyle = 3;
+                        chartpage.HasLegend = false;
+                        chartpage.HasTitle = false;
+
+                        //GRAFICA DE CORRIENTE DE CA3
+                        grafica_ac3.Range["G32"].Value = "GRAFICA DE CORRIENTE CA3";
+                        grafica_ac3.Range["G32"].Font.Size = 14;
+                        grafica_ac3.Range["G32"].Font.Bold = true;
+
+                        objcharts = grafica_ac3.ChartObjects();
+                        mychart = objcharts.Add(rt_sheet.Range["H33"].Left, rt_sheet.Range["H34"].Top, 945, 430);
+                        chartpage = mychart.Chart;
+                        chartrango = grafica_ac3.Range["B8:" + "B" + (rango + 2).ToString() + ",D8:" + "D" + (rango + 2).ToString()];
+                        chartpage.SetSourceData(chartrango);
+                        chartpage.ChartType = Excel.XlChartType.xlLine;
+                        chartpage.ChartStyle = 4;
+                        chartpage.HasLegend = false;
+                        chartpage.HasTitle = false;
+
+                        //GRAFICA DE POTENCIA DE CA3
+                        grafica_ac3.Range["G60"].Value = "GRAFICA DE POTENCIA CA3";
+                        grafica_ac3.Range["G60"].Font.Size = 14;
+                        grafica_ac3.Range["G60"].Font.Bold = true;
+
+                        objcharts = grafica_ac3.ChartObjects();
+                        mychart = objcharts.Add(rt_sheet.Range["H67"].Left, rt_sheet.Range["H67"].Top, 945, 430);
+                        chartpage = mychart.Chart;
+                        chartrango = grafica_ac3.Range["B8:" + "B" + (rango + 2).ToString() + ",E8:" + "E" + (rango + 2).ToString()];
+                        chartpage.SetSourceData(chartrango);
+                        chartpage.ChartType = Excel.XlChartType.xlLine;
+                        chartpage.ChartStyle = 4;
+                        chartpage.HasLegend = false;
+                        chartpage.HasTitle = false;
+
+                    }
+
+
+                    //guardar excel del reporte 
+                    string[] charsToRemove = new string[] { "/" };
+                    string fecha = dgvDatosTabla.Rows[0].Cells[8].Value.ToString();
+                    string id_rtubo = dgvDatosTabla.Rows[0].Cells[0].Value.ToString();
+                    foreach (var c in charsToRemove)
+                    {
+                        fecha = fecha.Replace(c, string.Empty);
+                    }
+                    //NOMBRE PARA EL ARCHIVO DEL REPORTE
+                    //R_IDP-(ID_PROYECTO)_IDT-(ID_TUBO)_f-(FECHA)
+                    string nombre_reporte = "Tubo_" + tubo_nr + "_" + maquina_reporte + "_F_" + fecha + "_NR" + id_rtubo;
+                    string pat = path_reportes_excel + maquina_reporte + "\\" + nombre_reporte + ".xlsx";
+                    rt_book.SaveAs(pat, oMissiong, oMissiong, oMissiong, oMissiong, oMissiong, Excel.XlSaveAsAccessMode.xlNoChange,
+                                    oMissiong, oMissiong, oMissiong, oMissiong, oMissiong);
+                    rt_book.Close(true, oMissiong, oMissiong);
+                    reporte_tuberia.Workbooks.Close();
+                    reporte_tuberia.Quit();
+
+
+                    Actualizar_Reporte_excel(nombre_reporte, maquina_reporte);
+
+                    //GC.Collect();
+                    //GC.WaitForPendingFinalizers();
+                    //habilitar botones
+                    Desabilitar_botones_ce(false);
+                    ptbIndicador1.Image = iglImagenes.Images[17];
+
                 }
-
-
-                //guardar excel del reporte 
-                string[] charsToRemove = new string[] { "/" };
-                string fecha = dgvDatosTabla.Rows[0].Cells[8].Value.ToString();
-                string id_rtubo = dgvDatosTabla.Rows[0].Cells[0].Value.ToString();
-                foreach (var c in charsToRemove)
+                catch (Exception e)
                 {
-                    fecha = fecha.Replace(c, string.Empty);
+                    //habilitar botones
+                    Desabilitar_botones_ce(false);
+                    ptbIndicador1.Image = iglImagenes.Images[17];
+                    MessageBox.Show("TABLA EXCEL ERROR: " + e.ToString());
                 }
-                //NOMBRE PARA EL ARCHIVO DEL REPORTE
-                //R_IDP-(ID_PROYECTO)_IDT-(ID_TUBO)_f-(FECHA)
-                string nombre_reporte = "Tubo_" + tubo_nr + "_" + maquina_reporte + "_F_" + fecha + "_NR" + id_rtubo;
-                string pat = path_reportes_excel + maquina_reporte + "\\" + nombre_reporte + ".xlsx";
-                rt_book.SaveAs(pat, oMissiong, oMissiong, oMissiong, oMissiong, oMissiong, Excel.XlSaveAsAccessMode.xlNoChange,
-                                oMissiong, oMissiong, oMissiong, oMissiong, oMissiong);
-                rt_book.Close(true, oMissiong, oMissiong);
-                reporte_tuberia.Workbooks.Close();
-                reporte_tuberia.Quit();
-
-
-                Actualizar_Reporte_excel(nombre_reporte, maquina_reporte);
-
-                //GC.Collect();
-                //GC.WaitForPendingFinalizers();
-                //habilitar botones
-                Desabilitar_botones_ce(false);
-                ptbIndicador1.Image = iglImagenes.Images[17];
-                
             }
             catch (Exception e)
             {
-                //habilitar botones
-                Desabilitar_botones_ce(false);
-                ptbIndicador1.Image = iglImagenes.Images[17];
-                MessageBox.Show("TABLA EXCEL ERROR: " + e.ToString());
+
+                MessageBox.Show("Crear excel: " + e.ToString());
+                Iniciar_tabla_tuberia();
+                Iniciar_tabla_operador();
+                Iniciar_tabla_proyecto();
+                Iniciar_formulario_principal();
+                btnIniciarAuto.PerformClick();
+
             }
+            
+            
         }
         #endregion
        
