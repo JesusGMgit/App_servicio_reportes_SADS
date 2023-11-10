@@ -93,6 +93,16 @@ namespace app_servicio_SADS2.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap GrayLED {
+            get {
+                object obj = ResourceManager.GetObject("GrayLED", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap icons8_ajustes_48 {
             get {
                 object obj = ResourceManager.GetObject("icons8-ajustes-48", resourceCulture);
@@ -146,6 +156,16 @@ namespace app_servicio_SADS2.Properties {
         internal static System.Drawing.Bitmap posters_resumen_de_fondo_azul_con_triangulos {
             get {
                 object obj = ResourceManager.GetObject("posters-resumen-de-fondo-azul-con-triangulos", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap RedLED {
+            get {
+                object obj = ResourceManager.GetObject("RedLED", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

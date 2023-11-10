@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing;
 
@@ -26,7 +22,7 @@ namespace app_servicio_SADS2
 
             if (title=="CONTRASEÑA")
             {
-                textBox.PasswordChar = 'D';
+                textBox.PasswordChar = '+';
             }                    
 
             buttonOk.Text = "OK";

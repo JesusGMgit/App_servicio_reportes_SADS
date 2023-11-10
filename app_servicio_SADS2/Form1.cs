@@ -38,7 +38,7 @@ namespace app_servicio_SADS2
         string P_url_externa1 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_1.php";
         string P_url_externa2 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_2.php";
         string P_url_externa3 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_3.php";
-        string version_app="version 1.2.0.38";
+        string version_app="version 1.3.0.0";
         
         //funcion principal
         public frmPrincipal()
@@ -253,14 +253,15 @@ namespace app_servicio_SADS2
         }
 
         //funcion para guaradar nombres de los archivos excel
-        void Actualizar_Reporte_excel(string nombre_reporte, string maquina_reporte)
+        void Actualizar_Reporte_excel(string nombre_reporte, string maquina_reporte, string ID_proyecto)
         {
             string id_Rtubo = dgvDatosTabla.Rows[0].Cells[0].Value.ToString();
 
             Dictionary<string, string> diccionario_update_reporte = new Dictionary<string, string>
                 {
                     {"T_ID_Rtubo", id_Rtubo },
-                    {"T_Reporte_excel", nombre_reporte+".xlsx"},
+                    {"T_Reporte_excel", nombre_reporte+".xlsx"}
+                    //{"T_ID_proyecto",ID_proyecto}
                 };
 
             //var content = new FormUrlEncodedContent(diccionario);
@@ -1070,7 +1071,7 @@ namespace app_servicio_SADS2
             //asignar a variables la hora inicial y final de busqueda de archivos excel
             string manual_carpeta = "MONITOREO_" + cmbManualMaquina.Text;
             string fecha_Ayer;
-            DateTime hora_antes_ayer;
+            
             if ((txbManualHoraInicial.Text != "") && (txbManualHoraFinal.Text != ""))
             {
                 hora_inicial = P_fecha_busqueda + " " + txbManualHoraInicial.Text;
@@ -1940,6 +1941,7 @@ namespace app_servicio_SADS2
                     }
                     //NOMBRE PARA EL ARCHIVO DEL REPORTE
                     //R_IDP-(ID_PROYECTO)_IDT-(ID_TUBO)_f-(FECHA)
+                    string ID_proyecto= P_proyecto_datatable.Rows[0]["ID"].ToString();
                     string nombre_reporte = "Tubo_" + tubo_nr + "_" + maquina_reporte + "_F_" + fecha + "_NR" + id_rtubo;
                     string pat = path_reportes_excel + maquina_reporte + "\\" + nombre_reporte + ".xlsx";
                     rt_book.SaveAs(pat, oMissiong, oMissiong, oMissiong, oMissiong, oMissiong, Excel.XlSaveAsAccessMode.xlNoChange,
@@ -1949,7 +1951,7 @@ namespace app_servicio_SADS2
                     reporte_tuberia.Quit();
 
 
-                    Actualizar_Reporte_excel(nombre_reporte, maquina_reporte);
+                    Actualizar_Reporte_excel(nombre_reporte, maquina_reporte, ID_proyecto);
 
                     //GC.Collect();
                     //GC.WaitForPendingFinalizers();

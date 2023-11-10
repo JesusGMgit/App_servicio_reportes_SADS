@@ -29,8 +29,8 @@
     <PublisherName>JGM_tubacero</PublisherName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>39</ApplicationRevision>
-    <ApplicationVersion>1.2.0.%2a</ApplicationVersion>
+    <ApplicationRevision>1</ApplicationRevision>
+    <ApplicationVersion>1.3.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -117,7 +117,7 @@
     <Compile Include="pruebas_archivos.Designer.cs">
       <DependentUpon>pruebas_archivos.cs</DependentUpon>
     </Compile>
-    <Compile Include="Tuberia_ayer_tabla.cs" />
+    <Compile Include="Tabla_exin.cs" />
     <Compile Include="Tuberia_externa_tabla.cs" />
     <Compile Include="Tuberia_interna_tabla.cs" />
     <EmbeddedResource Include="Busqueda_tubo.resx">
@@ -194,6 +194,8 @@
     <None Include="Resources\Minimize.png" />
     <None Include="Resources\AutoList.png" />
     <None Include="Resources\table.png" />
+    <None Include="Resources\GrayLED1.bmp" />
+    <None Include="Resources\RedLED1.bmp" />
     <Content Include="tubos2.ico" />
   </ItemGroup>
   <ItemGroup>
