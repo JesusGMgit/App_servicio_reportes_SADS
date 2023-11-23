@@ -229,7 +229,7 @@ namespace app_servicio_SADS2
            
         }
 
-        void Buscar_archivos_excel(string path_archivos, string fecha_archivos)
+        void Buscar_archivos_excel(string path_archivos, string fecha_b,string fecha_a)
         {
             LtbArchivosExcel.Items.Clear();
 
@@ -238,8 +238,25 @@ namespace app_servicio_SADS2
 
                 DirectoryInfo di = new DirectoryInfo(path_archivos);
                 string fechabuscada;
-               
-                fechabuscada = "*" + fecha_archivos + "*?.xlsx";
+
+                if (fecha_a != fecha_b)
+                {
+                    fechabuscada = "*" + fecha_a + "*?.xlsx";
+
+                    foreach (var fi in di.GetFiles(fechabuscada))
+                    {
+
+                        if (fi.Length > 65000)
+                        {
+                            LtbArchivosExcel.Items.Add(fi.Name);
+
+                        }
+
+                    }
+
+                }
+
+                fechabuscada = "*" + fecha_b + "*?.xlsx";
 
                 foreach (var fi in di.GetFiles(fechabuscada))
                 {
@@ -251,6 +268,8 @@ namespace app_servicio_SADS2
                     }
 
                 }
+
+                
             }
             catch (Exception e)
             {
@@ -381,14 +400,20 @@ namespace app_servicio_SADS2
             {
                 string ID_registro = dgvTuboBuscado.CurrentRow.Cells[13].Value.ToString();
                 string maquina = dgvTuboBuscado.CurrentRow.Cells[0].Value.ToString();
-                string fecha_db_string = dgvTuboBuscado.CurrentRow.Cells[11].Value.ToString();
-                DateTime fecha_db_datetime = Convert.ToDateTime(fecha_db_string);
-                fecha_db_string = fecha_db_datetime.ToString("yyyyMMdd");
+
+                string fecha_db_b_string = dgvTuboBuscado.CurrentRow.Cells[11].Value.ToString();
+                DateTime fecha_db_datetime = Convert.ToDateTime(fecha_db_b_string);
+                fecha_db_b_string = fecha_db_datetime.ToString("yyyyMMdd");
+                
                 Busqueda_registros(maquina, ID_registro);
 
+                string fecha_db_a_string = P_ATuberia_datatable.Rows[0]["T_hora_db"].ToString();
+                DateTime fecha_db_a_datetime = Convert.ToDateTime(fecha_db_a_string);
+                fecha_db_a_string = fecha_db_a_datetime.ToString("yyyyMMdd");
+
                 string carpeta = "MONITOREO_" + LblRBMaquina.Text;
-                Buscar_archivos_excel(pathP + carpeta, fecha_db_string);
-                string fecha_inicial = fecha_db_datetime.ToString("yyyy/MM/dd") + " " + LblRAHora.Text;
+                Buscar_archivos_excel(pathP + carpeta, fecha_db_b_string, fecha_db_a_string);
+                string fecha_inicial = fecha_db_a_datetime.ToString("yyyy/MM/dd") + " " + LblRAHora.Text;
                 string fecha_final = fecha_db_datetime.ToString("yyyy/MM/dd") + " " + LblRBHora.Text;
                 guardar_archivos_excel_tubo(fecha_inicial, fecha_final, carpeta, maquina);
                 btnCrearReporte.Enabled=true;

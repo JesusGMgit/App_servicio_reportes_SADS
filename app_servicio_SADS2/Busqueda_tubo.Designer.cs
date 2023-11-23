@@ -102,6 +102,7 @@
             // 
             // dgvTuboBuscado
             // 
+            this.dgvTuboBuscado.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             this.dgvTuboBuscado.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvTuboBuscado.Location = new System.Drawing.Point(14, 99);
             this.dgvTuboBuscado.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);

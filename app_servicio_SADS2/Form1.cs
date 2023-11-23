@@ -38,7 +38,7 @@ namespace app_servicio_SADS2
         string P_url_externa1 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_1.php";
         string P_url_externa2 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_2.php";
         string P_url_externa3 = "http://10.10.20.15/backend/api/ar_tTuberiaExterna_3.php";
-        string version_app="version 1.3.0.0";
+        string version_app="version 1.4.0.2";
         
         //funcion principal
         public frmPrincipal()
@@ -99,6 +99,7 @@ namespace app_servicio_SADS2
             btnModoManual.Text = "ABRIR";
             ptbIndicador1.Image = iglImagenes.Images[17];
             lblVersion.Text = version_app;
+            
         }
         void Iniciar_datagrid()
         {
@@ -181,14 +182,12 @@ namespace app_servicio_SADS2
             {
                 gpbModo.Enabled = false;
                 gpbModoManual.Enabled = false;
-                btnBusquedaTubo.Enabled = false;
                 button1.Enabled = false;
             }
             else
             {
                 gpbModo.Enabled = true;
                 gpbModoManual.Enabled = true;
-                btnBusquedaTubo.Enabled = true;
                 button1.Enabled = true;
             }
             
@@ -924,6 +923,7 @@ namespace app_servicio_SADS2
             tmrMonitoreo.Enabled = false;
             btnPararAuto.Enabled = false;
             btnModoManual.Enabled = true;
+            btnBusquedaTubo.Enabled = true;
             tssLEstado.Text = "en espera...";
         }
 
@@ -991,6 +991,7 @@ namespace app_servicio_SADS2
                 btnPararAuto.Enabled = true;
                 btnAjustes.Enabled = false;
                 btnModoManual.Enabled = false;
+                btnBusquedaTubo.Enabled = false;
             }
             
         }
