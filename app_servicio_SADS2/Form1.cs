@@ -1166,8 +1166,8 @@ namespace app_servicio_SADS2
 
             }
 
-            try
-            {
+            //try
+            //{
                 //abrir archivos excel
                 //crear archivo excel para reporte
 
@@ -1968,23 +1968,23 @@ namespace app_servicio_SADS2
                     ptbIndicador1.Image = iglImagenes.Images[17];
                     MessageBox.Show("TABLA EXCEL ERROR: " + e.ToString());
                 }
-            }
-            catch (Exception e)
-            {
+            /* }
+             catch (Exception e)
+             {
 
-                MessageBox.Show("Crear excel: " + e.ToString());
-                Iniciar_tabla_tuberia();
-                Iniciar_tabla_operador();
-                Iniciar_tabla_proyecto();
-                Iniciar_formulario_principal();
-                btnIniciarAuto.PerformClick();
+                 MessageBox.Show("Crear excel: " + e.ToString());
+                 Iniciar_tabla_tuberia();
+                 Iniciar_tabla_operador();
+                 Iniciar_tabla_proyecto();
+                 Iniciar_formulario_principal();
+                 btnIniciarAuto.PerformClick();
 
-            }
-            
-            
+             }*/
+
+
         }
         #endregion
-       
+
 
         #region funciones, rutinas en blanco
         private void cmbManualMaquina_SelectedIndexChanged(object sender, EventArgs e)
