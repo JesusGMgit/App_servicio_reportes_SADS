@@ -2,18 +2,15 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
-using System.Runtime.InteropServices;
-using System.Security.Policy;
+using Microsoft.Office.Interop.Excel;
+using app_servicio_SADS2.clases;
 
 namespace app_servicio_SADS2
 {
@@ -22,13 +19,38 @@ namespace app_servicio_SADS2
         string P_url_apis = "http://10.10.20.15/backend/api/";
         string pathP = @"C:\Users\Public\Documents\SMARTDAC+ Data Logging Software\Data\";
         string path_reportes_excel = @"C:\xampp\htdocs\Reportes\";
-        DataTable P_Tuberia_datatable = new DataTable();
-        DataTable P_ATuberia_datatable = new DataTable();
-        DataTable P_proyecto_datatable = new DataTable();
-        DataTable P_operador_datatable = new DataTable();
+        string P_path_smartdac_PH = @"C:\Users\Public\Documents\SMARTDAC+ Data Logging Software\Data\PH PRUEBAS\";
+        string P_path_reportes_PH = @"C:\xampp\htdocs\Reportes\PH\";
+        System.Data.DataTable P_Tuberia_datatable = new System.Data.DataTable();
+        System.Data.DataTable P_ATuberia_datatable = new System.Data.DataTable();
+        System.Data.DataTable P_proyecto_datatable = new System.Data.DataTable();
+        System.Data.DataTable P_operador_datatable = new System.Data.DataTable();
+        System.Data.DataTable P_datatable_datos_archivos_PH = new System.Data.DataTable();
+        ArchivosPH ArchivosPH_ = new ArchivosPH();
+
         public Busqueda_tubo()
         {
             InitializeComponent();
+        }
+
+        private void Busqueda_tubo_Load(object sender, EventArgs e)
+        {
+            Iniciar_tabla_tuberia();
+            Iniciar_tabla_registro_anterior();
+            Iniciar_tabla_proyecto();
+            Iniciar_tabla_operador();
+            Limpiar_objetos();
+            //ArchivosPH_.IniciarTablaDatosArchivoPH();
+            //IniciarTablaDatosArchivoPH();
+
+
+        }
+        void IniciarTablaDatosArchivoPH()
+        {
+            P_datatable_datos_archivos_PH.Columns.Clear();
+            P_datatable_datos_archivos_PH.Columns.Add("Nombre_Archivo");
+            P_datatable_datos_archivos_PH.Columns.Add("Hora");
+            P_datatable_datos_archivos_PH.Columns.Add("Fecha");
         }
         void Iniciar_tabla_proyecto()
         {
@@ -334,15 +356,7 @@ namespace app_servicio_SADS2
 
         }
 
-        private void Busqueda_tubo_Load(object sender, EventArgs e)
-        {
-            Iniciar_tabla_tuberia();
-            Iniciar_tabla_registro_anterior();
-            Iniciar_tabla_proyecto();
-            Iniciar_tabla_operador();
-            Limpiar_objetos();
-           
-        }
+        
 
         public void Limpiar_objetos()
         {
@@ -1307,5 +1321,27 @@ namespace app_servicio_SADS2
         {
             Crear_excel_rutina();
         }
+
+        private void btnArchivosPH_Click(object sender, EventArgs e)
+        {
+            AgregarArchivosdld_PH();
+        }
+
+        public void AgregarArchivosdld_PH()
+        {
+            bool status;
+
+            string fecha_busqueda = DpkFechaArchivos.Value.ToString("yyyyMMdd");
+
+            status = ArchivosPH_.AgregarArchivosdld_PH(fecha_busqueda);
+
+            if (status) 
+                LblDisplay1.Text = "Se encontraron archivos";
+            else 
+                LblDisplay1.Text = "No se encontraron archivos";
+  
+        }
+       
+        
     }
 }

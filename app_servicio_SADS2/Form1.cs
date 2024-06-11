@@ -11,6 +11,7 @@ using Excel = Microsoft.Office.Interop.Excel;
 using System.Runtime.InteropServices;
 using Newtonsoft.Json.Linq;
 using System.Text;
+using app_servicio_SADS2.clases;
 
 namespace app_servicio_SADS2
 {
@@ -21,14 +22,16 @@ namespace app_servicio_SADS2
         string path_temporal = "", P_maquina_reporte;
         string path_reportes_excel = @"C:\xampp\htdocs\Reportes\";
         int P_contador_tmr = 0, P_numero_minutos = 10;
+        ArchivosPH ArchivosPH = new ArchivosPH();
         DateTime P_hora_anterior = new DateTime(2008, 08, 08, 08, 08, 08);
         //DateTime P_hora_registro_anterior, P_temporal_datetime;
         DateTime P_hora_now, P_fecha_ayer;
         DataTable P_Tuberia_datatable = new DataTable();
-        DataTable P_Tuberia_datatable_ayer = new DataTable();
-        DataTable P_proyecto_datatable = new DataTable();
-        DataTable P_Tabla_excel = new DataTable();
-        DataTable P_operador_datatable = new DataTable();
+        System.Data.DataTable P_Tuberia_datatable_ayer = new System.Data.DataTable();
+        System.Data.DataTable P_proyecto_datatable = new System.Data.DataTable();
+        System.Data.DataTable P_Tabla_excel = new System.Data.DataTable();
+        System.Data.DataTable P_operador_datatable = new System.Data.DataTable();
+        System.Data.DataTable P_datatable_datos_archivos_PH = new System.Data.DataTable();
         bool P_manual, P_auto_un_registro, P_no_hay_archivos_ayer=true;
         string P_fecha_busqueda, P_url_get, P_url_update, P_ID_tubo;
         //varaibles url
@@ -276,11 +279,11 @@ namespace app_servicio_SADS2
 
         #region funciones para limpiar y llenar las tablas y datagrid del proyecto
 
-        DataTable Ordenar_registros_ampm(DataTable tabla_registros_a_ordenar)
+        System.Data.DataTable Ordenar_registros_ampm(System.Data.DataTable tabla_registros_a_ordenar)
         {
-            DataTable tuberia_filtro_am = tabla_registros_a_ordenar;
-            DataTable tuberia_filtro_pm = tabla_registros_a_ordenar;
-            DataTable tabla_temporal = new DataTable();
+            System.Data.DataTable tuberia_filtro_am = tabla_registros_a_ordenar;
+            System.Data.DataTable tuberia_filtro_pm = tabla_registros_a_ordenar;
+            System.Data.DataTable tabla_temporal = new System.Data.DataTable();
             DataView  tuberia_dataview;
             //Checar si hay datos en la tabla
             if (tabla_registros_a_ordenar.Rows.Count > 0)
@@ -336,7 +339,7 @@ namespace app_servicio_SADS2
             }
             return tabla_temporal;
         }
-        DataTable Reacomodar_12(DataTable tabla_reacomodar)
+        System.Data.DataTable Reacomodar_12(System.Data.DataTable tabla_reacomodar)
         {
             //tomo la vista de la tabla  para hacer los filtros necesarios
             DataView temporal_dataview_12 = tabla_reacomodar.DefaultView;
@@ -344,7 +347,7 @@ namespace app_servicio_SADS2
             //aplico un filtro para sacar solo el que tenga 12: en la hora
             temporal_dataview_12.RowFilter = "T_hora LIKE '12:*'";
             //se reacomoda los registros que en su columna hora tengan 12:
-            DataTable tabla_temporal_reacomodar = tabla_reacomodar;
+            System.Data.DataTable tabla_temporal_reacomodar = tabla_reacomodar;
             int num_filas = tabla_temporal_reacomodar.Rows.Count;
             int num_12 = temporal_dataview_12.Count;
             
@@ -392,7 +395,7 @@ namespace app_servicio_SADS2
             //llena la tabla de datos para tuberia de los registros solicitados por fecha dada
             
             P_Tuberia_datatable.Rows.Clear();
-            DataTable tabla_temporal = P_Tuberia_datatable;
+            System.Data.DataTable tabla_temporal = P_Tuberia_datatable;
             Thread.Sleep(500);
             
             try
@@ -422,7 +425,13 @@ namespace app_servicio_SADS2
 
                     }
                 }
-
+                else
+                {
+                    //agregar algo por si no hay datos, aviso en alguna elemento 
+                    //de la ventana de la app
+                    tssLNumeroArchivos.Text = "0 Archivos dia";
+                }
+                
                 //ordenar registros por hora 
                 P_Tuberia_datatable = Ordenar_registros_ampm(tabla_temporal);
 
@@ -487,7 +496,7 @@ namespace app_servicio_SADS2
         {
             //limpiar tabla de datos de registros de dia anterior en el que se esta trabajando
             P_Tuberia_datatable_ayer.Clear();
-            DataTable tabla_temporal = new DataTable();
+            System.Data.DataTable tabla_temporal = new System.Data.DataTable();
             //fecha en formato de busqueda en tabla de soldaduras
             string fecha_temporal;
             DateTime fecha_temporal_ayer = Convert.ToDateTime(P_fecha_busqueda);
@@ -553,8 +562,31 @@ namespace app_servicio_SADS2
 
         }
         #endregion
+        //Rutinas o funciones para copiado de archivos dld de PH
+        
 
+        public System.Data.DataTable BuscarArchivos_PH(string path_archivos)
+        {
+            P_datatable_datos_archivos_PH.Rows.Clear();
+            System.Data.DataTable tablatemporal = P_datatable_datos_archivos_PH;
+            try
+            {
+                DirectoryInfo di = new DirectoryInfo(path_archivos);
+                string fechabuscada = "*.dld";
+                foreach (var fi in di.GetFiles(fechabuscada))
+                {
+                    tablatemporal.Rows.Add(fi.Name, fi.LastWriteTime.ToShortTimeString(), fi.LastWriteTime.ToShortDateString());
+   
+                }
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show("Rellenar tabla:" + err.Message);
+            }
 
+            return tablatemporal;
+
+        }
         //subrutina principal de integracion
         public void Integracion_datos_tuberia()
         {
@@ -582,7 +614,7 @@ namespace app_servicio_SADS2
             DateTime fecha_formato_temporal = DateTime.Now;
             if (P_manual==true)
             {
-                
+                //cambiar txbManualFecha.text a una variable que venga de la llamada de la funcion
                 fecha_formato_temporal = Convert.ToDateTime(txbManualFecha.Text);
                 fecha_nom_archivo = fecha_formato_temporal.ToString("yyyyMMdd");
                 P_fecha_busqueda = txbManualFecha.Text;
@@ -592,10 +624,10 @@ namespace app_servicio_SADS2
                 fecha_nom_archivo = P_hora_now.ToString("yyyyMMdd");
             }
             
+            //mandar inforamcion a pantalla en los elementos asigandos
             tssLCarpeta.Text = carpeta_maquina;
-            
             lblTemporal2.Text = nom_maquina;
-            //LIMPIO LA TABLA DONDE SE ALAMCENAN 
+            //Limpio la tabla donde se almacenan.
             Limpiar_tabla_fecha(m_exin,nom_maquina);
             path_temporal = pathP + carpeta_maquina+"\\";
             //lblTemporal2.Text = path_temporal;
@@ -606,9 +638,11 @@ namespace app_servicio_SADS2
             if (dgvDatosTabla.Rows.Count != 0)
             {
                 tssLNumeroArchivos.Text = dgvDatosTabla.Rows.Count.ToString();
+                //CHECAR SI HAY ARCHIVOS DEL DIA ANTERIOR
+                //cambiar metodo para buscar archivos de dia anterior
+                //si es que se mejora el metodo de busqueda
                 Llenar_tabla_datos_ayer(m_exin,nom_maquina);
                 ltbTemporal2.Items.Clear();
-                //CHECAR SI HAY ARCHIVOS DEL DIA ANTERIOR
                 if (P_no_hay_archivos_ayer==false)
                 {
                     
@@ -969,9 +1003,10 @@ namespace app_servicio_SADS2
                     //codigo para revisar si hay nuevos datos de tubos
                     P_contador_tmr = 0;
                     Integracion_datos_tuberia();
+                    ArchivosPH.AgregarArchivosdld_PH(P_fecha_busqueda);
                 }
             }
-
+            
             tmrMonitoreo.Enabled = true;
         }
 
@@ -1003,6 +1038,7 @@ namespace app_servicio_SADS2
             Iniciar_tabla_operador();
             Iniciar_tabla_proyecto();
             Iniciar_formulario_principal();
+            //ArchivosPH.IniciarTablaDatosArchivoPH();
             P_numero_minutos = Properties.Settings.Default.Gnumero_minutos;
            
             /*txbManualHoraFinal.Enabled = false;

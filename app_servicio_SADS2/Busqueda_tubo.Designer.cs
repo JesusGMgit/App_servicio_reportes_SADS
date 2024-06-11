@@ -62,19 +62,24 @@
             this.btnCrearReporte = new System.Windows.Forms.Button();
             this.LtbTemporal = new System.Windows.Forms.ListBox();
             this.PtbExcel = new System.Windows.Forms.PictureBox();
+            this.btnArchivosPH = new System.Windows.Forms.Button();
+            this.DpkFechaArchivos = new System.Windows.Forms.DateTimePicker();
+            this.LblDisplay1 = new System.Windows.Forms.Label();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
             ((System.ComponentModel.ISupportInitialize)(this.dgvTuboBuscado)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PtbExcel)).BeginInit();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnBusqueda
             // 
             this.btnBusqueda.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnBusqueda.Location = new System.Drawing.Point(400, 26);
+            this.btnBusqueda.Location = new System.Drawing.Point(323, 30);
             this.btnBusqueda.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnBusqueda.Name = "btnBusqueda";
-            this.btnBusqueda.Size = new System.Drawing.Size(188, 46);
+            this.btnBusqueda.Size = new System.Drawing.Size(122, 38);
             this.btnBusqueda.TabIndex = 0;
             this.btnBusqueda.Text = "BUSCAR";
             this.btnBusqueda.UseVisualStyleBackColor = true;
@@ -84,7 +89,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(41, 9);
+            this.label1.Location = new System.Drawing.Point(13, 8);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(76, 20);
@@ -94,7 +99,7 @@
             // txbNoTubo
             // 
             this.txbNoTubo.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txbNoTubo.Location = new System.Drawing.Point(46, 36);
+            this.txbNoTubo.Location = new System.Drawing.Point(14, 36);
             this.txbNoTubo.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.txbNoTubo.Name = "txbNoTubo";
             this.txbNoTubo.Size = new System.Drawing.Size(128, 26);
@@ -104,7 +109,7 @@
             // 
             this.dgvTuboBuscado.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             this.dgvTuboBuscado.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvTuboBuscado.Location = new System.Drawing.Point(14, 99);
+            this.dgvTuboBuscado.Location = new System.Drawing.Point(14, 124);
             this.dgvTuboBuscado.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.dgvTuboBuscado.Name = "dgvTuboBuscado";
             this.dgvTuboBuscado.Size = new System.Drawing.Size(788, 106);
@@ -116,7 +121,7 @@
             // 
             this.CmbProyecto.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.CmbProyecto.FormattingEnabled = true;
-            this.CmbProyecto.Location = new System.Drawing.Point(202, 36);
+            this.CmbProyecto.Location = new System.Drawing.Point(163, 36);
             this.CmbProyecto.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.CmbProyecto.Name = "CmbProyecto";
             this.CmbProyecto.Size = new System.Drawing.Size(140, 28);
@@ -126,7 +131,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(197, 9);
+            this.label2.Location = new System.Drawing.Point(159, 8);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(106, 20);
@@ -136,9 +141,9 @@
             // LtbArchivosExcel
             // 
             this.LtbArchivosExcel.FormattingEnabled = true;
-            this.LtbArchivosExcel.Location = new System.Drawing.Point(12, 223);
+            this.LtbArchivosExcel.Location = new System.Drawing.Point(12, 236);
             this.LtbArchivosExcel.Name = "LtbArchivosExcel";
-            this.LtbArchivosExcel.Size = new System.Drawing.Size(305, 95);
+            this.LtbArchivosExcel.Size = new System.Drawing.Size(305, 82);
             this.LtbArchivosExcel.TabIndex = 6;
             // 
             // label4
@@ -407,7 +412,7 @@
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.Location = new System.Drawing.Point(324, 223);
+            this.label7.Location = new System.Drawing.Point(324, 236);
             this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(229, 20);
@@ -418,7 +423,7 @@
             // 
             this.LblArchivosExcel.AutoSize = true;
             this.LblArchivosExcel.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.LblArchivosExcel.Location = new System.Drawing.Point(324, 243);
+            this.LblArchivosExcel.Location = new System.Drawing.Point(325, 256);
             this.LblArchivosExcel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.LblArchivosExcel.Name = "LblArchivosExcel";
             this.LblArchivosExcel.Size = new System.Drawing.Size(37, 16);
@@ -432,7 +437,7 @@
             this.btnCrearReporte.Location = new System.Drawing.Point(673, 268);
             this.btnCrearReporte.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnCrearReporte.Name = "btnCrearReporte";
-            this.btnCrearReporte.Size = new System.Drawing.Size(129, 60);
+            this.btnCrearReporte.Size = new System.Drawing.Size(129, 50);
             this.btnCrearReporte.TabIndex = 19;
             this.btnCrearReporte.Text = "CREAR REPORTE";
             this.btnCrearReporte.UseVisualStyleBackColor = true;
@@ -455,6 +460,46 @@
             this.PtbExcel.TabIndex = 21;
             this.PtbExcel.TabStop = false;
             // 
+            // btnArchivosPH
+            // 
+            this.btnArchivosPH.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnArchivosPH.Location = new System.Drawing.Point(185, 17);
+            this.btnArchivosPH.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnArchivosPH.Name = "btnArchivosPH";
+            this.btnArchivosPH.Size = new System.Drawing.Size(111, 37);
+            this.btnArchivosPH.TabIndex = 22;
+            this.btnArchivosPH.Text = "INICIAR";
+            this.btnArchivosPH.UseVisualStyleBackColor = true;
+            this.btnArchivosPH.Click += new System.EventHandler(this.btnArchivosPH_Click);
+            // 
+            // DpkFechaArchivos
+            // 
+            this.DpkFechaArchivos.Location = new System.Drawing.Point(6, 28);
+            this.DpkFechaArchivos.Name = "DpkFechaArchivos";
+            this.DpkFechaArchivos.Size = new System.Drawing.Size(164, 20);
+            this.DpkFechaArchivos.TabIndex = 23;
+            // 
+            // LblDisplay1
+            // 
+            this.LblDisplay1.AutoSize = true;
+            this.LblDisplay1.Location = new System.Drawing.Point(6, 73);
+            this.LblDisplay1.Name = "LblDisplay1";
+            this.LblDisplay1.Size = new System.Drawing.Size(35, 13);
+            this.LblDisplay1.TabIndex = 24;
+            this.LblDisplay1.Text = ".......";
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.DpkFechaArchivos);
+            this.groupBox3.Controls.Add(this.btnArchivosPH);
+            this.groupBox3.Controls.Add(this.LblDisplay1);
+            this.groupBox3.Location = new System.Drawing.Point(496, 8);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(303, 110);
+            this.groupBox3.TabIndex = 25;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "GUARDAR ARCHIVOS PH";
+            // 
             // Busqueda_tubo
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 13F);
@@ -475,6 +520,7 @@
             this.Controls.Add(this.txbNoTubo);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btnBusqueda);
+            this.Controls.Add(this.groupBox3);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.MaximizeBox = false;
@@ -487,6 +533,8 @@
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.PtbExcel)).EndInit();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -528,5 +576,9 @@
         private System.Windows.Forms.Button btnCrearReporte;
         private System.Windows.Forms.ListBox LtbTemporal;
         private System.Windows.Forms.PictureBox PtbExcel;
+        private System.Windows.Forms.Button btnArchivosPH;
+        private System.Windows.Forms.DateTimePicker DpkFechaArchivos;
+        private System.Windows.Forms.Label LblDisplay1;
+        private System.Windows.Forms.GroupBox groupBox3;
     }
 }

@@ -14,7 +14,7 @@
     <Deterministic>true</Deterministic>
     <IsWebBootstrapper>true</IsWebBootstrapper>
     <TargetFrameworkProfile />
-    <PublishUrl>ftp://10.10.20.15/app_servicio/</PublishUrl>
+    <PublishUrl>ftp://10.10.20.15/apps/app_servicio/</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -24,12 +24,12 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>http://10.10.20.15/app_servico/</InstallUrl>
+    <InstallUrl>http://10.10.20.15/apps/app_servico/</InstallUrl>
     <ProductName>servicio de integracion del SADS</ProductName>
     <PublisherName>JGM_tubacero</PublisherName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>3</ApplicationRevision>
+    <ApplicationRevision>4</ApplicationRevision>
     <ApplicationVersion>1.4.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -99,6 +99,7 @@
     <Compile Include="Busqueda_tubo.Designer.cs">
       <DependentUpon>Busqueda_tubo.cs</DependentUpon>
     </Compile>
+    <Compile Include="clases\ArchivosPH.cs" />
     <Compile Include="Consultas.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
