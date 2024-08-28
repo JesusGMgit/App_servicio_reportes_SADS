@@ -262,7 +262,7 @@ namespace app_servicio_SADS2
             Dictionary<string, string> diccionario_update_reporte = new Dictionary<string, string>
                 {
                     {"T_ID_Rtubo", id_Rtubo },
-                    {"T_Reporte_excel", nombre_reporte+".xlsx"}
+                    {"T_Reporte_excel", nombre_reporte + ".xlsx"}
                     //{"T_ID_proyecto",ID_proyecto}
                 };
 
